@@ -27,7 +27,12 @@
                 <input type="reset" value="다시 입력" name="B2">
             </form>
         </div>
-
+        <!-- 회원가입 버튼 추가 -->
+        <div id="register_button">
+            <form method="GET" action="register">
+                <input type="submit" value="회원가입">
+            </form>
+        </div>
 
         <%@include file="footer.jspf"%>
     </body>
