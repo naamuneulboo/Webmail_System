@@ -21,6 +21,12 @@
                 alert("비밀번호와 비밀번호 확인이 일치하지 않습니다.");
                 return false;
             }
+            // 비밀번호 유효성 검사: 영문과 숫자를 조합한 6~14자리
+            var passwordPattern = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,14}$/;
+            if (!passwordPattern.test(password)) {
+                alert("비밀번호는 영문과 숫자를 조합한 6~14자리여야 합니다.");
+                return false;
+            }
             return true;
         }
 
@@ -33,62 +39,52 @@
                 alert("ID는 영어나 숫자로만 이루어져야 합니다.");
                 return false;
             }
+            // ID 유효성 검사: 영문과 숫자를 조합한 8~12자리
+            var idPattern = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,12}$/;
+            if (!idPattern.test(id)) {
+                alert("ID는 영문과 숫자를 조합한 8~12자리여야 합니다.");
+                return false;
+            }
             return true;
         }
-
-        function checkID() {
-            var id = document.getElementById("id").value;
-            // AJAX를 사용하여 서버로 ID를 전송하고, 중복 여부를 확인합니다.
-            var xhr = new XMLHttpRequest();
-            xhr.open("POST", "check_id.do", true);
-            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-            xhr.onreadystatechange = function () {
-                if (xhr.readyState === 4 && xhr.status === 200) {
-                    var response = xhr.responseText;
-                    if (response === "duplicate") {
-                        alert("이미 사용 중인 ID입니다. 다른 ID를 선택해주세요.");
-                    } else {
-                        alert("사용 가능한 ID입니다.");
-                    }
-                }
-            };
-            xhr.send("id=" + id);
-        }
-
     </script>
     <body>
+    <div id="main">
+        <h2>사용자 회원가입</h2>
+        <form name="AddUser" action="user_signup.do" method="POST" onsubmit="return validatePassword() && validateID();">
+            <table border="0" align="left">
+                <tr>
+                    <td>사용자 ID</td>
+                    <td> <input type="text" name="id" value="" size="20" /> </td>
+                </tr>
+                <tr>
+                    <td>비밀번호 </td>
+                    <td> <input type="password" name="password" value="" /> </td>
+                </tr>
+                <tr>
+                    <td>비밀번호 확인 </td>
+                    <td> <input type="password" name="password_check" value="" /> </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <input type="submit" value="등록" name="register" />
+                        <input type="reset" value="초기화" name="reset" />
+                    </td>
+                </tr>
+            </table>
+        </form>
 
+        
+        <form name="CheckIDForm" action="check_id.do" method="POST">
+            
+                <tr>
+                    <td colspan="2">
+                        <input type="submit" value="확인" name="checkID" />
+                    </td>
+                </tr>
+        </form>
+    </div>
+    <%@include file="footer.jspf"%>
+</body>
 
-        <div id="main">
-            회원가입을 위한 정보를 입력해 주시기 바랍니다. <br> <br>
-
-            <form name="AddUser" action="user_signup.do" method="POST" onsubmit="return validatePassword() && validateID();">
-
-
-                <table border="0" align="left">
-                    <tr>
-                        <td>사용자 ID</td>
-                        <td> <input type="text" name="id" value="" size="20" />  </td>
-                    <button type="button" onclick="checkID()">ID 확인</button>
-                    </tr>
-                    <tr>
-                        <td>비밀번호 </td>
-                        <td> <input type="password" name="password" value="" /> </td>
-                    </tr>
-                    <tr>
-                        <td>비밀번호 확인 </td>
-                        <td> <input type="password" name="password_check" value="" /> </td>
-                    </tr>
-                    <tr>
-                        <td colspan="2">
-                            <input type="submit" value="등록" name="register" />
-                            <input type="reset" value="초기화" name="reset" />
-                        </td>
-                    </tr>
-                </table>
-
-            </form>
-        </div>
-        <%@include file="footer.jspf"%>
-    </body>
 </html>
