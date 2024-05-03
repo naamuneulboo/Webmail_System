@@ -4,6 +4,7 @@
  */
 package deu.cse.spring_webmail.model;
 
+import static ch.qos.logback.core.testUtil.MockInitialContextFactory.initialize;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -31,9 +32,6 @@ public class UserAdminAgent {
     // private final String EOL = "\n";
     private final String EOL = "\r\n";
     private String cwd;
-
-    public UserAdminAgent() {
-    }
 
     public UserAdminAgent(String server, int port, String cwd,
             String root_id, String root_pass, String admin_id) {

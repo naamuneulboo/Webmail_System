@@ -183,55 +183,7 @@ public class SystemController {
         return "redirect:/admin_menu";
     }
 
-    private void loginAfterSignup(String id, String password, RedirectAttributes attrs, HttpSession session) {
-        String host = (String) session.getAttribute("host");
-
-        // Check the login information is valid using Pop3Agent.
-        Pop3Agent pop3Agent = new Pop3Agent(host, id, password);
-        boolean isLoginSuccess = pop3Agent.validate();
-
-        // Now call the correct page according to its validation result.
-        if (isLoginSuccess) {
-            if (isAdmin(id)) {
-                // HttpSession 객체에 userid를 등록해 둔다.
-                session.setAttribute("userid", id);
-                attrs.addFlashAttribute("msg", "회원가입 및 로그인에 성공하였습니다.");
-            } else {
-                // HttpSession 객체에 userid와 password를 등록해 둔다.
-                session.setAttribute("userid", id);
-                session.setAttribute("password", password);
-                attrs.addFlashAttribute("msg", "회원가입 및 로그인에 성공하였습니다.");
-            }
-        } else {
-            attrs.addFlashAttribute("msg", "로그인에 실패하였습니다.");
-        }
-    }
-
-    @PostMapping("/user_signup.do")
-    public String userSignup(@RequestParam String id, @RequestParam String password,
-            RedirectAttributes attrs, HttpSession session) {
-        log.debug("add_user.do: id = {}, password = {}, port = {}",
-                id, password, JAMES_CONTROL_PORT);
-
-        try {
-            String cwd = ctx.getRealPath(".");
-            UserAdminAgent agent = new UserAdminAgent(JAMES_HOST, JAMES_CONTROL_PORT, cwd,
-                    ROOT_ID, ROOT_PASSWORD, ADMINISTRATOR);
-
-            // if (addUser successful)
-            if (agent.addUser(id, password)) {
-                attrs.addFlashAttribute("msg", String.format("%s 님 회원가입에 성공하였습니다.", id));
-                // 로그인 수행
-                loginAfterSignup(id, password, attrs, session);
-            } else {
-                attrs.addFlashAttribute("msg", String.format("%s 님 회원가입에 실패하였습니다.", id));
-            }
-        } catch (Exception ex) {
-            log.error("add_user.do: 시스템 접속에 실패했습니다. 예외 = {}", ex.getMessage());
-        }
-
-        return "redirect:/main_menu";
-    }
+ 
 
     @GetMapping("/delete_user")
     public String deleteUser(Model model) {
