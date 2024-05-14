@@ -40,7 +40,7 @@
                     </tr>
                     <tr>
                         <td> 메일 제목 </td>
-                        <td> <input type="text" name="subj" size="80" 
+                        <td> <input type="text" name="subj" size="80" required
                                     value="${!empty param['sender'] ? "RE: " += sessionScope['subject'] : ''}" >  </td>
                     </tr>
                     <tr>
