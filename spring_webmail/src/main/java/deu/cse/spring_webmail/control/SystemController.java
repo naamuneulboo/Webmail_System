@@ -209,7 +209,7 @@ public class SystemController {
     
     
      @GetMapping("/change_user_password")
-    public String changeUser(Model model) {
+    public String changeUserpassword(Model model) {
         log.debug("change_user called");
         model.addAttribute("userList", getUserList());
         return "admin/change_user_password";
