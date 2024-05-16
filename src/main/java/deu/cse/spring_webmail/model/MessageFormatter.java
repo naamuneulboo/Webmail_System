@@ -39,7 +39,7 @@ public class MessageFormatter {
                 + " <th> 보낸 날짜 </td>   "
                 + " <th> 삭제 </td>   "
                 + " </tr>");
-
+        
         for (int i = messages.length - 1; i >= 0; i--) {
             MessageParser parser = new MessageParser(messages[i], userid);
             parser.parse(false);  // envelope 정보만 필요

@@ -92,7 +92,7 @@ public class Pop3Agent {
     public String getMessageList() {
         String result = "";
         Message[] messages = null;
-
+        
         if (!connectToStore()) {  // 3.1
             log.error("POP3 connection failed!");
             return "POP3 연결이 되지 않아 메일 목록을 볼 수 없습니다.";
@@ -102,7 +102,18 @@ public class Pop3Agent {
             // 메일 폴더 열기
             Folder folder = store.getFolder("INBOX");  // 3.2
             folder.open(Folder.READ_ONLY);  // 3.3
-
+            
+            //전체 메일 수
+            int total = folder.getMessageCount();
+            
+            if (total == 0) {
+            //받은 메일이 없을 경우
+                StringBuilder buffer = new StringBuilder();
+                buffer.append("<strong>받은 메일이 없습니다.</strong>");
+                result = buffer.toString();
+                return buffer.toString();
+            }
+            
             // 현재 수신한 메시지 모두 가져오기
             messages = folder.getMessages();      // 3.4
             FetchProfile fp = new FetchProfile();
