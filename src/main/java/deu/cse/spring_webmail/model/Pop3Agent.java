@@ -86,9 +86,6 @@ public class Pop3Agent {
         }
     }
 
-    /*
-     * 페이지 단위로 메일 목록을 보여주어야 함.
-     */
     public String getMessageList() {
         String result = "";
         Message[] messages = null;

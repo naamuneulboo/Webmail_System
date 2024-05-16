@@ -183,7 +183,29 @@ public class SystemController {
         return "redirect:/admin_menu";
     }
 
- 
+    @PostMapping("/user_sign_up.do")
+    public String UserSignUpDo(@RequestParam String id, @RequestParam String password,
+            RedirectAttributes attrs) {
+        log.debug("add_user.do: id = {}, password = {}, port = {}",
+                id, password, JAMES_CONTROL_PORT);
+
+        try {
+            String cwd = ctx.getRealPath(".");
+            UserAdminAgent agent = new UserAdminAgent(JAMES_HOST, JAMES_CONTROL_PORT, cwd,
+                    ROOT_ID, ROOT_PASSWORD, ADMINISTRATOR);
+
+            if (agent.addUser(id, password)) {
+                attrs.addFlashAttribute("msg", String.format("%s 님. 회원가입에 성공하셨습니다!", id));
+            } else {
+                attrs.addFlashAttribute("msg", String.format("%s 님. 회원가입에 실패하셨습니다.", id));
+            }
+
+        } catch (Exception ex) {
+            log.error("user_sign_up.do: 시스템 접속에 실패했습니다. 예외 = {}", ex.getMessage());
+        }
+
+        return "redirect:/";
+    }
 
     @GetMapping("/delete_user")
     public String deleteUser(Model model) {

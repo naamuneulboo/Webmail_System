@@ -39,8 +39,8 @@ public class UserAdminAgent {
         this.server = server;  // 127.0.0.1
         this.port = port;  // 4555
         this.cwd = cwd;
-        this.ROOT_ID = root_id;
-        this.ROOT_PASSWORD = root_pass;
+        this.ROOT_ID = root_id;  // root
+        this.ROOT_PASSWORD = root_pass;  // root
         this.ADMIN_ID = admin_id;
 
         log.debug("isConnected = {}, root.id = {}", isConnected, ROOT_ID);

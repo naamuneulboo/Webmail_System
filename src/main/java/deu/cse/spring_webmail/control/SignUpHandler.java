@@ -1,87 +1,87 @@
 package deu.cse.spring_webmail.control;
 
-import deu.cse.spring_webmail.model.Pop3Agent;
 import deu.cse.spring_webmail.model.UserAdminAgent;
-import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.PrintWriter;
 
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
-/**
- *
- * @author 이가연
- */
-@Controller
-@PropertySource("classpath:/system.properties")
-@Slf4j
-public class SignUpHandler {
+@WebServlet(name = "SignUpHandler", urlPatterns = {"/SignUp.do"})
+public class SignUpHandler extends HttpServlet {
 
-    @Autowired
-    private ServletContext ctx;
-
-    @Value("${root.id}")
-    private String ROOT_ID;
-    @Value("${root.password}")
-    private String ROOT_PASSWORD;
-    @Value("${admin.id}")
-    private String ADMINISTRATOR;  //  = "admin";
-    @Value("${james.control.port}")
-    private Integer JAMES_CONTROL_PORT;
-    @Value("${james.host}")
-    private String JAMES_HOST;
-
-    @PostMapping("/user_signup.do")
-    public String userSignup(@RequestParam String id, @RequestParam String password,
-            RedirectAttributes attrs, HttpSession session) {
-        log.debug("add_user.do: id = {}, password = {}, port = {}",
-                id, password, JAMES_CONTROL_PORT);
-        
-        try {
+    /**
+     * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
+     * methods.
+     *
+     * @param request servlet request
+     * @param response servlet response
+     * @throws ServletException if a servlet-specific error occurs
+     * @throws IOException if an I/O error occurs
+     */
+    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        response.setContentType("text/html;charset=UTF-8");
+        try ( PrintWriter out = response.getWriter()) {
+            String id = request.getParameter("id");
+            String password = request.getParameter("passwd");
+ 
+            String server = "127.0.0.1";
+            int port = 4555;
+            String ROOT_ID = "root";
+            String ROOT_PASSWORD = "20212964";
+            String ADMIN_ID = "admin";
             
-            String cwd = ctx.getRealPath(".");
-            UserAdminAgent agent = new UserAdminAgent(JAMES_HOST, JAMES_CONTROL_PORT, cwd,
-                    ROOT_ID, ROOT_PASSWORD, ADMINISTRATOR);
-
-            // if (addUser successful)
+            UserAdminAgent agent = new UserAdminAgent(server, port, this.getServletContext().getRealPath("."),ROOT_ID,ROOT_PASSWORD,ADMIN_ID);
+            //회원가입 성공 시 가입성공 페이지로 redirect
             if (agent.addUser(id, password)) {
-                // 로그인 수행
-                loginAfterSignup(id, password, attrs, session);
-            } else {
-                attrs.addFlashAttribute("msg", id + " 님 회원가입에 실패하였습니다.");
+                response.sendRedirect("signup_success.jsp");
             }
+
         } catch (Exception ex) {
-            log.error("user_signup.do: 시스템 접속에 실패했습니다. 예외 = {}", ex.getMessage());
-        }
-
-        return "redirect:/main_menu";
-    }
-
-    private void loginAfterSignup(String id, String password, RedirectAttributes attrs, HttpSession session) {
-        String host = (String) session.getAttribute("host");
-
-        Pop3Agent pop3Agent = new Pop3Agent(host, id, password);
-        boolean isLoginSuccess = pop3Agent.validate();
-
-        if (isLoginSuccess) {
-                // HttpSession 객체에 userid와 password를 등록해 둔다.
-                session.setAttribute("userid", id);
-                session.setAttribute("password", password);
-                attrs.addFlashAttribute("msg", "회원가입 및 로그인에 성공하였습니다.");
-        /*    }*/
-        } else {
-            attrs.addFlashAttribute("msg", "로그인에 실패하였습니다.");
+            System.out.println("시스템 접속에 실패했습니다.");
         }
     }
+
+    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
+    /**
+     * Handles the HTTP <code>GET</code> method.
+     *
+     * @param request servlet request
+     * @param response servlet response
+     * @throws ServletException if a servlet-specific error occurs
+     * @throws IOException if an I/O error occurs
+     */
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        processRequest(request, response);
+    }
+
+    /**
+     * Handles the HTTP <code>POST</code> method.
+     *
+     * @param request servlet request
+     * @param response servlet response
+     * @throws ServletException if a servlet-specific error occurs
+     * @throws IOException if an I/O error occurs
+     */
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        processRequest(request, response);
+    }
+
+    /**
+     * Returns a short description of the servlet.
+     *
+     * @return a String containing servlet description
+     */
+    @Override
+    public String getServletInfo() {
+        return "Short description";
+    }// </editor-fold>
 
 }
