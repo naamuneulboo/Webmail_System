@@ -89,7 +89,7 @@ public class Pop3Agent {
     /*
      * 페이지 단위로 메일 목록을 보여주어야 함.
      */
-    public String getMessageList() {
+    public String getMessageList(int page, int size) {
         String result = "";
         Message[] messages = null;
         
@@ -114,8 +114,12 @@ public class Pop3Agent {
                 return buffer.toString();
             }
             
+            //페이징을 위한 범위 계산
+            int start = (page -1)* size + 1;
+            int end = Math.min(start + size - 1, total);
+            
             // 현재 수신한 메시지 모두 가져오기
-            messages = folder.getMessages();      // 3.4
+            messages = folder.getMessages(start, end);      // 3.4
             FetchProfile fp = new FetchProfile();
             // From, To, Cc, Bcc, ReplyTo, Subject & Date
             fp.add(FetchProfile.Item.ENVELOPE);
@@ -190,4 +194,22 @@ public class Pop3Agent {
         }
     }
     
+      public int getTotalMessageCount() {
+        if (!connectToStore()) {
+            log.error("POP3 connection failed!");
+            return 0;
+        }
+
+        try {
+            Folder folder = store.getFolder("INBOX");
+            folder.open(Folder.READ_ONLY);
+            int total = folder.getMessageCount();
+            folder.close(true);
+            store.close();
+            return total;
+        } catch (Exception ex) {
+            log.error("Pop3Agent.getTotalMessageCount() : exception = {}", ex.getMessage());
+            return 0;
+        }
+    }
 }

@@ -21,28 +21,79 @@
 -->
 
 <html>
-    <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>주메뉴 화면</title>
-        <link type="text/css" rel="stylesheet" href="css/main_style.css" />
-        <script>
-            <c:if test="${!empty msg}">
-            alert("${msg}");
-            </c:if>
-        </script>
-    </head>
-    <body>
-        <%@include file="header.jspf"%>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>주메뉴 화면</title>
+    <link type="text/css" rel="stylesheet" href="css/main_style.css" />
+    <style>
+        .messages {
+            margin-bottom: 20px;
+        }
+        .pagination-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px 0;
+        }
+        .pagination {
+            display: flex;
+            justify-content: center;
+            list-style: none;
+            padding: 0;
+        }
+        .pagination li {
+            margin: 0 5px;
+        }
+        .pagination a {
+            text-decoration: none;
+            color: #007bff;
+        }
+        .pagination a:hover {
+            text-decoration: underline;
+        }
+        .pagination .current-page {
+            font-weight: bold;
+        }
+    </style>
+    <script>
+        function confirmDelete() {
+            return confirm('정말로 메시지를 삭제하시겠습니까?');
+        }
 
-        <div id="sidebar">
-            <jsp:include page="sidebar_menu.jsp" />
-        </div>
+        <c:if test="${!empty msg}">
+        alert("${msg}");
+        </c:if>
+    </script>
+</head>
+<body>
+    <%@include file="header.jspf"%>
 
-        <!-- 메시지 삭제 링크를 누르면 바로 삭제되어 실수할 수 있음. 해결 방법은? -->
-        <div id="main">
+    <div id="sidebar">
+        <jsp:include page="sidebar_menu.jsp" />
+    </div>
+
+    <div id="main">
+        <div class="messages">
             ${messageList}
         </div>
 
-        <%@include file="footer.jspf"%>
-    </body>
+        <div class="pagination-container">
+            <ul class="pagination">
+                <c:if test="${currentPage > 1}">
+                    <li><a href="?page=${currentPage - 1}&size=${size}"><<</a></li>
+                </c:if>
+                <c:forEach begin="1" end="${totalPages}" var="page">
+                    <li>
+                        <a href="?page=${page}&size=${size}" class="${page == currentPage ? 'current-page' : ''}">${page}</a>
+                    </li>
+                </c:forEach>
+                <c:if test="${currentPage < totalPages}">
+                    <li><a href="?page=${currentPage + 1}&size=${size}">>></a></li>
+                </c:if>
+            </ul>
+        </div>
+    </div>
+
+    <%@include file="footer.jspf"%>
+</body>
 </html>

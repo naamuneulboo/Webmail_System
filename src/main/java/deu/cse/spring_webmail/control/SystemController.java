@@ -133,14 +133,21 @@ public class SystemController {
     }
 
     @GetMapping("/main_menu")
-    public String mainMenu(Model model) {
+    public String mainMenu(Model model, @RequestParam(name = "page", defaultValue = "1") int page,
+                                        @RequestParam(name = "size", defaultValue = "10") int size){
+        
         Pop3Agent pop3 = new Pop3Agent();
         pop3.setHost((String) session.getAttribute("host"));
         pop3.setUserid((String) session.getAttribute("userid"));
         pop3.setPassword((String) session.getAttribute("password"));
-
-        String messageList = pop3.getMessageList();
+        
+        String messageList = pop3.getMessageList(page, size);
+        int totalMessages = pop3.getTotalMessageCount();
+        int totalPages = (int) Math.ceil((double) totalMessages / size);
+        
         model.addAttribute("messageList", messageList);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", totalPages);
         return "main_menu";
     }
 
@@ -269,5 +276,4 @@ public class SystemController {
         }
         return null;
     }
-
 }
