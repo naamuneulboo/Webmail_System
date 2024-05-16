@@ -56,10 +56,6 @@
         }
     </style>
     <script>
-        function confirmDelete() {
-            return confirm('정말로 메시지를 삭제하시겠습니까?');
-        }
-
         <c:if test="${!empty msg}">
         alert("${msg}");
         </c:if>
