@@ -66,7 +66,7 @@ public class MessageFormatter {
                     + " <td id=date>" + parser.getSentDate() + "</td>"
                     + " <td id=delete>"
                     + "<a onclick=\"return confirm('정말로 삭제하시겠습니까?')\" href=delete_mail.do"
-                    + "?msgid=" + actualIndex + "> 삭제 </a>" + "</td>"
+                    + "?msgid=" + (startIndex+i) + "> 삭제 </a>" + "</td>"
                     + " </tr>");
         }
         buffer.append("</table>");
