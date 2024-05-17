@@ -80,7 +80,7 @@ public class SmtpAgent {
             }
 
             //msg.setSubject(s);
-//            msg.setSubject(MimeUtility.encodeText(this.subj, "euc-kr", "B"));
+            //msg.setSubject(MimeUtility.encodeText(this.subj, "euc-kr", "B"));
             msg.setSubject(this.subj);
 
             //msg.setHeader("Content-Type", "text/plain; charset=utf-8");

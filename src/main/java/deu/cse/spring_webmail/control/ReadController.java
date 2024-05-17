@@ -15,7 +15,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import java.io.PrintWriter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -53,13 +55,13 @@ public class ReadController {
     @GetMapping("/show_message")
     public String showMessage(@RequestParam Integer msgid, Model model) {
         log.debug("download_folder = {}", DOWNLOAD_FOLDER);
-        
+
         Pop3Agent pop3 = new Pop3Agent();
         pop3.setHost((String) session.getAttribute("host"));
         pop3.setUserid((String) session.getAttribute("userid"));
         pop3.setPassword((String) session.getAttribute("password"));
         pop3.setRequest(request);
-        
+
         String msg = pop3.getMessage(msgid);
         session.setAttribute("sender", pop3.getSender());  // 220612 LJM - added
         session.setAttribute("subject", pop3.getSubject());
@@ -67,7 +69,7 @@ public class ReadController {
         model.addAttribute("msg", msg);
         return "/read_mail/show_message";
     }
-    
+
     @GetMapping("/download")
     public ResponseEntity<Resource> download(@RequestParam("userid") String userId,
             @RequestParam("filename") String fileName) {
@@ -77,7 +79,7 @@ public class ReadController {
         } catch (UnsupportedEncodingException ex) {
             log.error("error");
         }
-        
+
         // 1. 내려받기할 파일의 기본 경로 설정
         String basePath = ctx.getRealPath(DOWNLOAD_FOLDER) + File.separator + userId;
 
@@ -110,8 +112,8 @@ public class ReadController {
 
         return new ResponseEntity<>(resource, headers, HttpStatus.OK);
     }
-    
-    @GetMapping("/delete_mail.do")
+
+    /*@GetMapping("/delete_mail.do")
     public String deleteMailDo(@RequestParam("msgid") Integer msgId, RedirectAttributes attrs) {
         log.debug("delete_mail.do: msgid = {}", msgId);
         
@@ -120,6 +122,8 @@ public class ReadController {
         String password = (String) session.getAttribute("password");
 
         Pop3Agent pop3 = new Pop3Agent(host, userid, password);
+        
+        
         boolean deleteSuccessful = pop3.deleteMessage(msgId, true);
         if (deleteSuccessful) {
             attrs.addFlashAttribute("msg", "메시지 삭제를 성공하였습니다.");
@@ -128,5 +132,47 @@ public class ReadController {
         }
         
         return "redirect:main_menu";
+    }*/
+    
+    @GetMapping("/delete_mail.do")
+    public String deleteMailDo(@RequestParam("msgid") Integer msgId, RedirectAttributes attrs, HttpServletRequest request, HttpServletResponse response) throws IOException {
+        log.debug("delete_mail.do: msgid = {}", msgId);
+
+        // HTML과 JavaScript로 팝업창을 띄우기 위한 코드
+        response.setContentType("text/html;charset=UTF-8");
+        PrintWriter out = response.getWriter();
+        out.println("<html><body>");
+        out.println("<script type=\"text/javascript\">");
+        out.println("if (confirm('정말 메일을 삭제하시겠습니까?')) {");
+        out.println("  window.location.href = 'confirm_delete_mail.do?msgid=" + msgId + "';");
+        out.println("} else {");
+        out.println("  window.location.href = 'main_menu';");
+        out.println("}");
+        out.println("</script>");
+        out.println("</body></html>");
+        out.close();
+
+        return null; // 추가적인 처리를 막기 위해 null 반환
     }
+
+    @GetMapping("/confirm_delete_mail.do")
+    public String confirmDeleteMail(@RequestParam("msgid") Integer msgId, RedirectAttributes attrs, HttpSession session) {
+        log.debug("confirm_delete_mail.do: msgid = {}", msgId);
+
+        String host = (String) session.getAttribute("host");
+        String userid = (String) session.getAttribute("userid");
+        String password = (String) session.getAttribute("password");
+
+        Pop3Agent pop3 = new Pop3Agent(host, userid, password);
+
+        boolean deleteSuccessful = pop3.deleteMessage(msgId, true);
+        if (deleteSuccessful) {
+            attrs.addFlashAttribute("msg", "메시지 삭제를 성공하였습니다.");
+        } else {
+            attrs.addFlashAttribute("msg", "메시지 삭제를 실패하였습니다.");
+        }
+
+        return "redirect:main_menu";
+    }
+
 }

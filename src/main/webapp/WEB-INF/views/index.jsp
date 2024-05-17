@@ -36,12 +36,12 @@
             &nbsp;&nbsp;⇑ ⇑ 웹 메일 시스템 회원가입 바로가기
         </div>
 
-        <div>
+        <div style="color:blue">
             <c:if test="${not empty msg}">
                 <p>${msg}</p>
             </c:if>
         </div>   
-
+   
         <%@include file="footer.jspf"%>
     </body>
 

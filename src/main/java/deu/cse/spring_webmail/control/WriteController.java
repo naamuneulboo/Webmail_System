@@ -119,6 +119,6 @@ public class WriteController {
         if (agent.sendMessage()) {
             status = true;
         }
-        return status;
+        return status; 
     }  // sendMessage()
 }

@@ -39,10 +39,11 @@
         </div>
 
         <!-- 메시지 삭제 링크를 누르면 바로 삭제되어 실수할 수 있음. 해결 방법은? -->
+        
         <div id="main">
             ${messageList}
         </div>
 
         <%@include file="footer.jspf"%>
     </body>
-</html>
+</html> 

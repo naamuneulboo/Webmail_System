@@ -30,12 +30,19 @@
                 if (id.trim() === "" || password.trim() === "" || password_check.trim() === "") {
                     alert("모든 필드를 입력해주세요.");
                     return false;
-                } 
-                
-                // 아이디 유효성 검사: 이메일 형식
-                var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                if (!emailRegex.test(id)) {
-                    alert("올바른 이메일 주소를 입력해주세요.");
+                }
+
+                // 아이디 유효성 검사: 영문자와 숫자만 허용, 4~10글자
+                var idRegex = /^[a-zA-Z0-9]{4,10}$/;
+                if (!idRegex.test(id)) {
+                    alert("아이디는 영문자와 숫자만 허용하며, 4~10글자로 입력해주세요.");
+                    return false;
+                }
+
+
+                // 비밀번호 확인
+                if (password !== password_check) {
+                    alert("비밀번호와 비밀번호 확인이 일치하지 않습니다.");
                     return false;
                 }
 
@@ -46,16 +53,12 @@
                     return false;
                 }
 
-                // 비밀번호 확인
-                if (password !== password_check) {
-                    alert("비밀번호와 비밀번호 확인이 일치하지 않습니다.");
-                    return false;
-                }
+
 
 
                 return true;
             }
-        </script>
+        </script> 
     </head>
     <body>
         <%@include file="header.jspf"%>
@@ -63,12 +66,15 @@
         <div id="main">
             사용자 ID와 암호를 입력해 주시기 바랍니다. <br> <br>
 
+
             <form name="UserSignUp" action="user_sign_up.do" method="POST" onsubmit="return validateForm()">
                 <table border="0" align="left">
                     <tr>
                         <td>ID</td>
                         <td> <input type="text" name="id" value="" size="20" onkeydown="return preventSpace(event)" />  </td>
+                        <td><input type="button" value="ID 중복확인" name="id_check" /></td>
                     </tr>
+                
                     <tr>
                         <td>비밀번호 </td>
                         <td> <input type="password" name="password" value="" onkeydown="return preventSpace(event)" /> </td>
@@ -84,7 +90,10 @@
                         </td>
                     </tr>
                 </table>
-            </form>
+            </form> 
+
+
+
         </div>
         <%@include file="footer.jspf"%>
     </body>
