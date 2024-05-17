@@ -22,6 +22,7 @@ public class MessageFormatter {
     private HttpServletRequest request = null;
     
     private int totalMessages;
+    private int startIndex;
     private int endIndex;
     
     // 220612 LJM - added to implement REPLY
@@ -29,9 +30,10 @@ public class MessageFormatter {
     @Getter private String subject;
     @Getter private String body;
     
-    public MessageFormatter(String userid, int totalMessages, int endIndex) {
+    public MessageFormatter(String userid, int totalMessages, int startIndex, int endIndex) {
         this.userid = userid;
         this.totalMessages = totalMessages;
+        this.startIndex = startIndex;
         this.endIndex = endIndex;
     }
     
@@ -48,18 +50,18 @@ public class MessageFormatter {
                 + " <th> 삭제 </td>   "
                 + " </tr>");
         
-        for (int i = messages.length - 1; i >= 0; i--) {
+        for (int i = 0; i < messages.length; i++) {
             MessageParser parser = new MessageParser(messages[i], userid);
             parser.parse(false);  // envelope 정보만 필요
             
-            int actualIndex = endIndex - i;
+            int actualIndex = totalMessages - (startIndex + i) + 1;
             // 메시지 헤더 포맷
             // 추출한 정보를 출력 포맷 사용하여 스트링으로 만들기
             buffer.append("<tr> "
                     + " <td id=no>" + actualIndex + " </td> "
                     + " <td id=sender>" + parser.getFromAddress() + "</td>"
                     + " <td id=subject> "
-                    + " <a href=show_message?msgid=" + actualIndex + " title=\"메일 보기\"> "
+                    + " <a href=show_message?msgid=" + (startIndex + i) + " title=\"메일 보기\"> "
                     + parser.getSubject() + "</a> </td>"
                     + " <td id=date>" + parser.getSentDate() + "</td>"
                     + " <td id=delete>"

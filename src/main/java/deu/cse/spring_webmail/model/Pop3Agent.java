@@ -117,7 +117,8 @@ public class Pop3Agent {
             //페이징을 위한 범위 계산
             int start = (page -1)* size + 1;
             int end = Math.min(start + size - 1, total);
-            log.info("start={}, end={}",start,end);
+            log.info("start={}, end={}",start, end);
+            //int startIndex = (page-1)*size+1;
             
             // 현재 수신한 메시지 모두 가져오기
             messages = folder.getMessages(start, end);      // 3.4
@@ -126,7 +127,7 @@ public class Pop3Agent {
             fp.add(FetchProfile.Item.ENVELOPE);
             folder.fetch(messages, fp);
 
-            MessageFormatter formatter = new MessageFormatter(userid,total,end);  //3.5
+            MessageFormatter formatter = new MessageFormatter(userid,total,start, end);  //3.5
             result = formatter.getMessageTable(messages);   // 3.6
 
             folder.close(true);  // 3.7
