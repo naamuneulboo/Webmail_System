@@ -143,7 +143,7 @@ public class SystemController {
         model.addAttribute("messageList", messageList);
         return "main_menu";
     }
-
+     
     @GetMapping("/admin_menu")
     public String adminMenu(Model model) {
         log.debug("root.id = {}, root.password = {}, admin.id = {}",
@@ -157,6 +157,11 @@ public class SystemController {
     public String addUser() {
         return "admin/add_user";
     }
+    
+    @GetMapping("/sentmail")
+    public String sentmail() {
+        return "sentmail";
+    }
 
     @PostMapping("/add_user.do")
     public String addUserDo(@RequestParam String id, @RequestParam String password,
@@ -168,9 +173,7 @@ public class SystemController {
             String cwd = ctx.getRealPath(".");
             UserAdminAgent agent = new UserAdminAgent(JAMES_HOST, JAMES_CONTROL_PORT, cwd,
                     ROOT_ID, ROOT_PASSWORD, ADMINISTRATOR);
-
-            // if (addUser successful)  사용자 등록 성공 팦업창
-            // else 사용자 등록 실패 팝업창
+ 
             if (agent.addUser(id, password)) {
                 attrs.addFlashAttribute("msg", String.format("사용자(%s) 추가를 성공하였습니다.", id));
             } else {
@@ -186,7 +189,7 @@ public class SystemController {
     @PostMapping("/user_sign_up.do")
     public String UserSignUpDo(@RequestParam String id, @RequestParam String password,
             RedirectAttributes attrs) {
-        log.debug("add_user.do: id = {}, password = {}, port = {}",
+        log.debug("user_sign_up.do: id = {}, password = {}, port = {}",
                 id, password, JAMES_CONTROL_PORT);
 
         try {
