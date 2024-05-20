@@ -14,6 +14,8 @@ import jakarta.mail.internet.MimeUtility;
 import java.io.File;
 import java.io.FileOutputStream;
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -27,17 +29,40 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RequiredArgsConstructor
 public class MessageParser {
-    @NonNull @Getter @Setter private Message message;
-    @NonNull @Getter @Setter private String userid;
-    @Getter @Setter private String toAddress;
-    @Getter @Setter private String fromAddress;
-    @Getter @Setter private String ccAddress;
-    @Getter @Setter private String sentDate;
-    @Getter @Setter private String subject;
-    @Getter @Setter private String body;
-    @Getter @Setter private String fileName;
-    @Getter @Setter private String downloadTempDir = "C:/temp/download/";
-    
+
+    @NonNull
+    @Getter
+    @Setter
+    private Message message;
+    @NonNull
+    @Getter
+    @Setter
+    private String userid;
+    @Getter
+    @Setter
+    private String toAddress;
+    @Getter
+    @Setter
+    private String fromAddress;
+    @Getter
+    @Setter
+    private String ccAddress;
+    @Getter
+    @Setter
+    private String sentDate;
+    @Getter
+    @Setter
+    private String subject;
+    @Getter
+    @Setter
+    private String body;
+    @Getter
+    @Setter
+    private String fileName;
+    @Getter
+    @Setter
+    private String downloadTempDir = "C:/temp/download/";
+
     public MessageParser(Message message, String userid, HttpServletRequest request) {
         this(message, userid);
         PropertyReader props = new PropertyReader();
@@ -82,7 +107,7 @@ public class MessageParser {
         sentDate = message.getSentDate().toString();
         sentDate = sentDate.substring(0, sentDate.length() - 8);  // 8 for "KST 20XX"
     }
-
+    /*
     // ref: http://www.oracle.com/technetwork/java/faq-135477.html#readattach
     private void getPart(Part p) throws Exception {
         String disp = p.getDisposition();
@@ -132,6 +157,45 @@ public class MessageParser {
                 }
             }
         }
+    }*/
+
+    private List<String> attachmentFileNames = new ArrayList<>();
+
+    
+    // 다중 첨부파일 수신 관련
+    private void getPart(Part p) throws Exception {
+        String disp = p.getDisposition();
+
+        if (disp != null && (disp.equalsIgnoreCase(Part.ATTACHMENT)
+                || disp.equalsIgnoreCase(Part.INLINE))) {  // 첨부 파일
+            String fileName = MimeUtility.decodeText(p.getFileName());
+            if (fileName != null) {
+                // 첨부 파일을 서버의 내려받기 임시 저장소에 저장
+                String tempUserDir = this.downloadTempDir + File.separator + this.userid;
+                File dir = new File(tempUserDir);
+                if (!dir.exists()) {  // tempUserDir 생성
+                    dir.mkdir();
+                }
+
+                String filename = MimeUtility.decodeText(p.getFileName());
+                DataHandler dh = p.getDataHandler();
+                FileOutputStream fos = new FileOutputStream(tempUserDir + File.separator + filename);
+                dh.writeTo(fos);
+                fos.flush();
+                fos.close();
+                // 파일명을 리스트에 추가
+                attachmentFileNames.add(filename);
+            }
+        } else if (p.isMimeType("multipart/*")) {
+            Multipart mp = (Multipart) p.getContent();
+            for (int i = 0; i < mp.getCount(); i++) {
+                getPart(mp.getBodyPart(i));
+            }
+        }
+    }
+
+    public List<String> getAttachmentFileNames() {
+        return attachmentFileNames;
     }
 
     private void printMessage(boolean printBody) {

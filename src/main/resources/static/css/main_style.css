@@ -91,7 +91,8 @@ td#subject {
 }
 
 #msgBody {
-    background-color: yellow;
+    background-color: lightyellow;
+    border: 2px solid yellow;
 }
 
 a:link {
