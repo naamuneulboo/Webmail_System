@@ -161,7 +161,6 @@ public class MessageParser {
 
     private List<String> attachmentFileNames = new ArrayList<>();
 
-    
     // 다중 첨부파일 수신 관련
     private void getPart(Part p) throws Exception {
         String disp = p.getDisposition();
@@ -186,13 +185,30 @@ public class MessageParser {
                 // 파일명을 리스트에 추가
                 attachmentFileNames.add(filename);
             }
-        } else if (p.isMimeType("multipart/*")) {
-            Multipart mp = (Multipart) p.getContent();
-            for (int i = 0; i < mp.getCount(); i++) {
-                getPart(mp.getBodyPart(i));
+        } else {  // 메일 본문
+            if (p.isMimeType("text/*")) {
+                body = (String) p.getContent();
+                if (p.isMimeType("text/plain")) {
+                    body = body.replaceAll("\r\n", " <br>");
+                }
+            } else if (p.isMimeType("multipart/alternative")) {
+                // html text보다  plain text 선호
+                Multipart mp = (Multipart) p.getContent();
+                for (int i = 0; i < mp.getCount(); i++) {
+                    Part bp = mp.getBodyPart(i);
+                    if (bp.isMimeType("text/plain")) {  // "text/html"도 있을 것임.
+                        getPart(bp);
+                    }
+                }
+            } else if (p.isMimeType("multipart/*")) {
+                Multipart mp = (Multipart) p.getContent();
+                for (int i = 0; i < mp.getCount(); i++) {
+                    getPart(mp.getBodyPart(i));
+                }
             }
         }
     }
+    
 
     public List<String> getAttachmentFileNames() {
         return attachmentFileNames;

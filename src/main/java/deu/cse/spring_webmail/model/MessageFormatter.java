@@ -98,6 +98,7 @@ public class MessageFormatter {
         return buffer.toString();
     }*/
     
+    
     // 다중 첨부파일 수신 관련
     public String getMessage(Message message) {
         StringBuilder buffer = new StringBuilder();
@@ -109,17 +110,17 @@ public class MessageFormatter {
         subject = parser.getSubject();
         body = parser.getBody();
 
-        buffer.append("보낸 사람: " + parser.getFromAddress() + " <br>");
-        buffer.append("받은 사람: " + parser.getToAddress() + " <br>");
-        buffer.append("Cc &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; : " + parser.getCcAddress() + " <br>");
-        buffer.append("보낸 날짜: " + parser.getSentDate() + " <br>");
-        buffer.append("제 &nbsp;&nbsp;&nbsp;  목: " + parser.getSubject() + " <br> <hr>");
+        buffer.append("<strong>보낸 사람:</strong> " + parser.getFromAddress() + " <br>");
+        buffer.append("<strong>받은 사람:</strong> " + parser.getToAddress() + " <br>");
+        buffer.append("<strong>Cc &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :</strong> " + parser.getCcAddress() + " <br>");
+        buffer.append("<strong>보낸 날짜:</strong> " + parser.getSentDate() + " <br>");
+        buffer.append("<strong>제 &nbsp;&nbsp;&nbsp;  목:</strong> " + parser.getSubject() + " <br> <hr>");
 
         buffer.append(parser.getBody());
 
         List<String> attachedFiles = parser.getAttachmentFileNames();
         if (!attachedFiles.isEmpty()) {
-            buffer.append("<br> <hr> 첨부파일: <br>");
+            buffer.append("<br> <hr> <strong>첨부파일:</strong> <br>");
             for (String attachedFile : attachedFiles) {
                 buffer.append("<a href=download"
                         + "?userid=" + this.userid
