@@ -18,14 +18,20 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RequiredArgsConstructor
 public class MessageFormatter {
-    @NonNull private String userid;  // 파일 임시 저장 디렉토리 생성에 필요
-    private HttpServletRequest request = null;
-    
-    // 220612 LJM - added to implement REPLY
-    @Getter private String sender;
-    @Getter private String subject;
-    @Getter private String body;
 
+    @NonNull
+    private String userid;  // 파일 임시 저장 디렉토리 생성에 필요
+    private HttpServletRequest request = null;
+
+    // 220612 LJM - added to implement REPLY
+    @Getter
+    private String sender;
+    @Getter
+    private String Recipient;
+    @Getter
+    private String subject;
+    @Getter
+    private String body;
 
     public String getMessageTable(Message[] messages) {
         StringBuilder buffer = new StringBuilder();
@@ -60,7 +66,7 @@ public class MessageFormatter {
         buffer.append("</table>");
 
         return buffer.toString();
-//        return "MessageFormatter 테이블 결과";
+
     }
 
     public String getMessage(Message message) {
@@ -69,7 +75,7 @@ public class MessageFormatter {
         // MessageParser parser = new MessageParser(message, userid);
         MessageParser parser = new MessageParser(message, userid, request);
         parser.parse(true);
-        
+
         sender = parser.getFromAddress();
         subject = parser.getSubject();
         body = parser.getBody();

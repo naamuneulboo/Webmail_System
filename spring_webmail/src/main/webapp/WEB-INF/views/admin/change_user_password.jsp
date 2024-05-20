@@ -44,6 +44,7 @@
 
                 <input type="submit" value="변경" name="change_command" 
                        onClick ="return getConfirmResult()"/>
+                <input type="reset" value="초기화" />
             </form>
         </div>
 

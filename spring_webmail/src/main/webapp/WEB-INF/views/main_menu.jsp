@@ -1,7 +1,7 @@
 <%-- 
-    Document   : main_menu
-    Created on : 2022. 6. 10., 오후 3:15:45
-    Author     : skylo
+    Document   : sent_mail
+    Created on : 2024. 5. 15., 오후 11:52:45
+    Author     : jsh
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
@@ -23,7 +23,7 @@
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>주메뉴 화면</title>
+        <title>주메인 화면</title>
         <link type="text/css" rel="stylesheet" href="css/main_style.css" />
         <script>
             <c:if test="${!empty msg}">

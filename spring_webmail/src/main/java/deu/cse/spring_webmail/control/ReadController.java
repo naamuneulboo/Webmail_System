@@ -5,6 +5,8 @@
 package deu.cse.spring_webmail.control;
 
 import deu.cse.spring_webmail.model.Pop3Agent;
+import deu.cse.spring_webmail.model.inboxManager;
+import deu.cse.spring_webmail.model.inboxRow;
 import jakarta.mail.internet.MimeUtility;
 import java.io.File;
 import java.io.IOException;
@@ -16,10 +18,12 @@ import java.nio.file.Paths;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.core.env.Environment;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ContentDisposition;
@@ -29,6 +33,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -49,17 +54,24 @@ public class ReadController {
     private HttpServletRequest request;
     @Value("${file.download_folder}")
     private String DOWNLOAD_FOLDER;
+    @Autowired
+    private Environment env;
+
+    @Value("${mysql.server.ip}")
+    private String mysqlServerIp;
+    @Value("${mysql.server.port}")
+    private String mysqlServerPort;
 
     @GetMapping("/show_message")
     public String showMessage(@RequestParam Integer msgid, Model model) {
         log.debug("download_folder = {}", DOWNLOAD_FOLDER);
-        
+
         Pop3Agent pop3 = new Pop3Agent();
         pop3.setHost((String) session.getAttribute("host"));
         pop3.setUserid((String) session.getAttribute("userid"));
         pop3.setPassword((String) session.getAttribute("password"));
         pop3.setRequest(request);
-        
+
         String msg = pop3.getMessage(msgid);
         session.setAttribute("sender", pop3.getSender());  // 220612 LJM - added
         session.setAttribute("subject", pop3.getSubject());
@@ -67,7 +79,54 @@ public class ReadController {
         model.addAttribute("msg", msg);
         return "/read_mail/show_message";
     }
-    
+
+    @GetMapping("/sent_mail")
+    public String sentmail(Model model) {
+        Pop3Agent pop3 = new Pop3Agent();
+        pop3.setHost((String) session.getAttribute("host"));
+        pop3.setUserid((String) session.getAttribute("userid"));
+        pop3.setPassword((String) session.getAttribute("password"));
+
+        String userName = env.getProperty("spring.datasource.username");
+        String password = env.getProperty("spring.datasource.password");
+        String jdbcDriver = env.getProperty("spring.datasource.driver-class-name");
+        log.debug("ip={},port={}", this.mysqlServerIp, this.mysqlServerPort);
+
+        inboxManager manager = new inboxManager(mysqlServerIp,
+                mysqlServerPort, userName, password, jdbcDriver);
+        List<inboxRow> dataRows = manager.getAllRows();
+        model.addAttribute("dataRows", dataRows);
+
+        return "sent_mail";
+    }
+
+    @GetMapping("/show_sentmessage")
+    public String deleteMessage(@RequestParam("messageId") String messageId, Model model) {
+        
+        Pop3Agent pop3 = new Pop3Agent();
+        pop3.setHost((String) session.getAttribute("host"));
+        pop3.setUserid((String) session.getAttribute("userid"));
+        pop3.setPassword((String) session.getAttribute("password"));
+        
+        String userName = env.getProperty("spring.datasource.username");
+        String password = env.getProperty("spring.datasource.password");
+        String jdbcDriver = env.getProperty("spring.datasource.driver-class-name");
+        String mysqlServerIp = env.getProperty("mysql.server.ip");
+        String mysqlServerPort = env.getProperty("mysql.server.port");
+
+        inboxManager manager = new inboxManager(mysqlServerIp, mysqlServerPort, userName, password, jdbcDriver);
+        boolean isDeleted = manager.deleteMessageById(messageId);
+
+        if (isDeleted) {
+            model.addAttribute("msg", "메시지가 성공적으로 삭제되었습니다.");
+        } else {
+            model.addAttribute("msg", "메시지 삭제 실패.");
+        }
+
+        return "read_mail/show_sentmessage";
+    }
+
+
     @GetMapping("/download")
     public ResponseEntity<Resource> download(@RequestParam("userid") String userId,
             @RequestParam("filename") String fileName) {
@@ -77,7 +136,7 @@ public class ReadController {
         } catch (UnsupportedEncodingException ex) {
             log.error("error");
         }
-        
+
         // 1. 내려받기할 파일의 기본 경로 설정
         String basePath = ctx.getRealPath(DOWNLOAD_FOLDER) + File.separator + userId;
 
@@ -110,11 +169,11 @@ public class ReadController {
 
         return new ResponseEntity<>(resource, headers, HttpStatus.OK);
     }
-    
+
     @GetMapping("/delete_mail.do")
     public String deleteMailDo(@RequestParam("msgid") Integer msgId, RedirectAttributes attrs) {
         log.debug("delete_mail.do: msgid = {}", msgId);
-        
+
         String host = (String) session.getAttribute("host");
         String userid = (String) session.getAttribute("userid");
         String password = (String) session.getAttribute("password");
@@ -126,7 +185,8 @@ public class ReadController {
         } else {
             attrs.addFlashAttribute("msg", "메시지 삭제를 실패하였습니다.");
         }
-        
+
         return "redirect:main_menu";
     }
+
 }
