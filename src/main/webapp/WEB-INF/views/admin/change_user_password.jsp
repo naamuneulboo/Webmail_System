@@ -18,6 +18,14 @@
                 var result = confirm("사용자의 비밀번호를 변경 하시겠습니까?");
                 return result;
             }
+            
+            function preventSpace(event) {
+                if (event.keyCode === 32) {
+                    event.preventDefault();
+                    return false;
+                }
+                return true;
+            }
         </script>
     </head>
     <body>
@@ -30,7 +38,7 @@
         <div id="main">
             <h2> 비밀번호를 수정할 사용자를 선택해 주세요. </h2> <br>
 
-            <form name="ChangeUser" action="change_user_password.do" method="POST">
+            <form name="ChangeUser" action="change_user_password.do" method="POST" >
                 <%
                     for (String userId : (java.util.List<String>) request.getAttribute("userList")) {
                         out.print("<label><input type=radio name=\"selectedUsers\" "
@@ -40,8 +48,9 @@
                 %>
                 <br>
                 
-                <label>새 비밀번호: <input type="password" name="newPassword" required></label><br><!-- comment -->
-
+                <label>새 비밀번호: <input type="password" name="newPassword" required  onkeydown="return preventSpace(event)"></label><br><!-- comment -->
+                <label>비밀번호 확인: <input type="password" name="password_check" required  onkeydown="return preventSpace(event)"></label><br><!-- comment -->
+                
                 <input type="submit" value="변경" name="change_command" 
                        onClick ="return getConfirmResult()"/>
                 <input type="reset" value="초기화" />

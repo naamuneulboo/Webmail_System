@@ -246,24 +246,6 @@ public class ReadController {
         return "redirect:main_menu";
     }
 
-    @GetMapping("/confirm_delete_mail.do")
-    public String confirmDeleteMail(@RequestParam("msgid") Integer msgId, RedirectAttributes attrs, HttpSession session) {
-        log.debug("confirm_delete_mail.do: msgid = {}", msgId);
-
-        String host = (String) session.getAttribute("host");
-        String userid = (String) session.getAttribute("userid");
-        String password = (String) session.getAttribute("password");
-
-        Pop3Agent pop3 = new Pop3Agent(host, userid, password);
-
-        boolean deleteSuccessful = pop3.deleteMessage(msgId, true);
-        if (deleteSuccessful) {
-            attrs.addFlashAttribute("msg", "메시지 삭제를 성공하였습니다.");
-        } else {
-            attrs.addFlashAttribute("msg", "메시지 삭제를 실패하였습니다.");
-        }
-
-        return "redirect:main_menu";
-    }
+   
 
 }
