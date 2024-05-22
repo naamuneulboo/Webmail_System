@@ -158,11 +158,30 @@ public class SystemController {
         return "admin/add_user";
     }
     
-    @GetMapping("/sentmail")
-    public String sentmail() {
-        return "sentmail";
+     @GetMapping("/change_user_password")
+    public String changeUser(Model model) {
+        log.debug("change_user called");
+        model.addAttribute("userList", getUserList());
+        return "admin/change_user_password";
+    }
+    
+     @PostMapping("change_user_password.do")
+    public String changeUserpasswordDo(@RequestParam String[] selectedUsers,@RequestParam String newPassword, RedirectAttributes attrs) {
+        log.debug("change_user_password.do: selectedUser = {}", List.of(selectedUsers));
+
+        try {
+            String cwd = ctx.getRealPath(".");
+            UserAdminAgent agent = new UserAdminAgent(JAMES_HOST, JAMES_CONTROL_PORT, cwd,
+                    ROOT_ID, ROOT_PASSWORD, ADMINISTRATOR);
+            agent.changeUserpassword(selectedUsers,newPassword);  
+        } catch (Exception ex) {
+            log.error("change_user_password.do : 예외 = {}", ex);
+        }
+
+        return "redirect:/admin_menu";
     }
 
+    
     @PostMapping("/add_user.do")
     public String addUserDo(@RequestParam String id, @RequestParam String password,
             RedirectAttributes attrs) {
