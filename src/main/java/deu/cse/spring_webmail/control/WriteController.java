@@ -91,6 +91,11 @@ public class WriteController {
         log.debug("write_mail.do: to = {}, cc = {}, subj = {}, body = {}, files count = {}",
                 to, cc, subj, body, upFiles.length);
 
+        //메일 제목이 공란인 경우
+        if(subj.replaceAll("\\p{Z}", "").length()==0) {
+            subj = "제목 없음";
+        }
+        
         // 파일 업로드 처리
         for (MultipartFile upFile : upFiles) {
             if (!upFile.isEmpty()) {

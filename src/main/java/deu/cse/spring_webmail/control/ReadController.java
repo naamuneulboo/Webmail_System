@@ -128,6 +128,7 @@ public class ReadController {
         session.setAttribute("subject", pop3.getSubject());
         session.setAttribute("body", pop3.getBody());
         model.addAttribute("msg", msg);
+        model.addAttribute("msgid", msgid);
         return "/read_mail/show_message";
     }
 
@@ -226,25 +227,23 @@ public class ReadController {
         
         return "redirect:main_menu";
     }*/
-    @GetMapping("/delete_mail.do")
-    public String deleteMailDo(@RequestParam("msgid") Integer msgId, RedirectAttributes attrs, HttpServletRequest request, HttpServletResponse response) throws IOException {
+     @GetMapping("/delete_mail.do")
+    public String deleteMailDo(@RequestParam("msgid") Integer msgId, RedirectAttributes attrs) {
         log.debug("delete_mail.do: msgid = {}", msgId);
+        
+        String host = (String) session.getAttribute("host");
+        String userid = (String) session.getAttribute("userid");
+        String password = (String) session.getAttribute("password");
 
-        // HTML과 JavaScript로 팝업창을 띄우기 위한 코드
-        response.setContentType("text/html;charset=UTF-8");
-        PrintWriter out = response.getWriter();
-        out.println("<html><body>");
-        out.println("<script type=\"text/javascript\">");
-        out.println("if (confirm('정말 메일을 삭제하시겠습니까?')) {");
-        out.println("  window.location.href = 'confirm_delete_mail.do?msgid=" + msgId + "';");
-        out.println("} else {");
-        out.println("  window.location.href = 'main_menu';");
-        out.println("}");
-        out.println("</script>");
-        out.println("</body></html>");
-        out.close();
-
-        return null; // 추가적인 처리를 막기 위해 null 반환
+        Pop3Agent pop3 = new Pop3Agent(host, userid, password);
+        boolean deleteSuccessful = pop3.deleteMessage(msgId, true);
+        if (deleteSuccessful) {
+            attrs.addFlashAttribute("msg", "메시지 삭제를 성공하였습니다.");
+        } else {
+            attrs.addFlashAttribute("msg", "메시지 삭제를 실패하였습니다.");
+        }
+        
+        return "redirect:main_menu";
     }
 
     @GetMapping("/confirm_delete_mail.do")

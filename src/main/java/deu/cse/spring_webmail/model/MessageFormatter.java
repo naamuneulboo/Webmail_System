@@ -24,6 +24,10 @@ public class MessageFormatter {
     private String userid;  // 파일 임시 저장 디렉토리 생성에 필요
     private HttpServletRequest request = null;
 
+    private int totalMessages;
+    private int startIndex;
+    private int endIndex;
+    
     // 220612 LJM - added to implement REPLY
     @Getter
     private String sender;
@@ -32,6 +36,14 @@ public class MessageFormatter {
     @Getter
     private String body;
 
+    
+     public MessageFormatter(String userid, int totalMessages, int startIndex, int endIndex) {
+        this.userid = userid;
+        this.totalMessages = totalMessages;
+        this.startIndex = startIndex;
+        this.endIndex = endIndex;
+    }
+     
     public String getMessageTable(Message[] messages) {
         StringBuilder buffer = new StringBuilder();
 
@@ -48,18 +60,20 @@ public class MessageFormatter {
         for (int i = messages.length - 1; i >= 0; i--) {
             MessageParser parser = new MessageParser(messages[i], userid);
             parser.parse(false);  // envelope 정보만 필요
+            
+            int actualIndex = totalMessages - (startIndex + i) + 1;
             // 메시지 헤더 포맷
             // 추출한 정보를 출력 포맷 사용하여 스트링으로 만들기
             buffer.append("<tr> "
-                    + " <td id=no>" + (i + 1) + " </td> "
+                    + " <td id=no>" + actualIndex + " </td> "
                     + " <td id=sender>" + parser.getFromAddress() + "</td>"
                     + " <td id=subject> "
-                    + " <a href=show_message?msgid=" + (i + 1) + " title=\"메일 보기\"> "
+                    + " <a href=show_message?msgid=" + (startIndex + i) + " title=\"메일 보기\"> "
                     + parser.getSubject() + "</a> </td>"
                     + " <td id=date>" + parser.getSentDate() + "</td>"
                     + " <td id=delete>"
-                    + "<a href=delete_mail.do"
-                    + "?msgid=" + (i + 1) + "> 삭제 </a>" + "</td>"
+                    + "<a onclick=\"return confirm('정말로 삭제하시겠습니까?')\" href=delete_mail.do"
+                    + "?msgid=" + (startIndex+i) + "> 삭제 </a>" + "</td>"
                     + " </tr>");
         }
         buffer.append("</table>");

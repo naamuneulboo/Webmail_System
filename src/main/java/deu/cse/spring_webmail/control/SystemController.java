@@ -133,17 +133,24 @@ public class SystemController {
     }
 
     @GetMapping("/main_menu")
-    public String mainMenu(Model model) {
+    public String mainMenu(Model model, @RequestParam(name = "page", defaultValue = "1") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size) {
+
         Pop3Agent pop3 = new Pop3Agent();
         pop3.setHost((String) session.getAttribute("host"));
         pop3.setUserid((String) session.getAttribute("userid"));
         pop3.setPassword((String) session.getAttribute("password"));
 
-        String messageList = pop3.getMessageList();
+        String messageList = pop3.getMessageList(page, size);
+        int totalMessages = pop3.getTotalMessageCount();
+        int totalPages = (int) Math.ceil((double) totalMessages / size);
+
         model.addAttribute("messageList", messageList);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", totalPages);
         return "main_menu";
     }
-     
+
     @GetMapping("/admin_menu")
     public String adminMenu(Model model) {
         log.debug("root.id = {}, root.password = {}, admin.id = {}",
@@ -157,23 +164,23 @@ public class SystemController {
     public String addUser() {
         return "admin/add_user";
     }
-    
-     @GetMapping("/change_user_password")
+
+    @GetMapping("/change_user_password")
     public String changeUser(Model model) {
         log.debug("change_user called");
         model.addAttribute("userList", getUserList());
         return "admin/change_user_password";
     }
-    
-     @PostMapping("change_user_password.do")
-    public String changeUserpasswordDo(@RequestParam String[] selectedUsers,@RequestParam String newPassword, RedirectAttributes attrs) {
+
+    @PostMapping("change_user_password.do")
+    public String changeUserpasswordDo(@RequestParam String[] selectedUsers, @RequestParam String newPassword, RedirectAttributes attrs) {
         log.debug("change_user_password.do: selectedUser = {}", List.of(selectedUsers));
 
         try {
             String cwd = ctx.getRealPath(".");
             UserAdminAgent agent = new UserAdminAgent(JAMES_HOST, JAMES_CONTROL_PORT, cwd,
                     ROOT_ID, ROOT_PASSWORD, ADMINISTRATOR);
-            agent.changeUserpassword(selectedUsers,newPassword);  
+            agent.changeUserpassword(selectedUsers, newPassword);
         } catch (Exception ex) {
             log.error("change_user_password.do : 예외 = {}", ex);
         }
@@ -181,7 +188,6 @@ public class SystemController {
         return "redirect:/admin_menu";
     }
 
-    
     @PostMapping("/add_user.do")
     public String addUserDo(@RequestParam String id, @RequestParam String password,
             RedirectAttributes attrs) {
@@ -192,7 +198,7 @@ public class SystemController {
             String cwd = ctx.getRealPath(".");
             UserAdminAgent agent = new UserAdminAgent(JAMES_HOST, JAMES_CONTROL_PORT, cwd,
                     ROOT_ID, ROOT_PASSWORD, ADMINISTRATOR);
- 
+
             if (agent.addUser(id, password)) {
                 attrs.addFlashAttribute("msg", String.format("사용자(%s) 추가를 성공하였습니다.", id));
             } else {
