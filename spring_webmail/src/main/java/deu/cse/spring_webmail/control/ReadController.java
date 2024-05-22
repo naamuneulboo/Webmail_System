@@ -4,6 +4,7 @@
  */
 package deu.cse.spring_webmail.control;
 
+import deu.cse.spring_webmail.model.MessagesentParser;
 import deu.cse.spring_webmail.model.Pop3Agent;
 import deu.cse.spring_webmail.model.inboxManager;
 import deu.cse.spring_webmail.model.inboxRow;
@@ -19,6 +20,7 @@ import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import java.util.List;
+import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -102,12 +104,12 @@ public class ReadController {
 
     @GetMapping("/show_sentmessage")
     public String deleteMessage(@RequestParam("messageId") String messageId, Model model) {
-        
+
         Pop3Agent pop3 = new Pop3Agent();
         pop3.setHost((String) session.getAttribute("host"));
         pop3.setUserid((String) session.getAttribute("userid"));
         pop3.setPassword((String) session.getAttribute("password"));
-        
+
         String userName = env.getProperty("spring.datasource.username");
         String password = env.getProperty("spring.datasource.password");
         String jdbcDriver = env.getProperty("spring.datasource.driver-class-name");
@@ -115,17 +117,17 @@ public class ReadController {
         String mysqlServerPort = env.getProperty("mysql.server.port");
 
         inboxManager manager = new inboxManager(mysqlServerIp, mysqlServerPort, userName, password, jdbcDriver);
-        boolean isDeleted = manager.deleteMessageById(messageId);
+        String messageBody = manager.getMessageById(messageId);
 
-        if (isDeleted) {
-            model.addAttribute("msg", "메시지가 성공적으로 삭제되었습니다.");
+        if (messageBody != null) {
+            Map<String, String> messageDetails = MessagesentParser.parseMessage(messageBody);
+            model.addAttribute("message", messageDetails);
         } else {
-            model.addAttribute("msg", "메시지 삭제 실패.");
+            model.addAttribute("msg", "메시지를 찾을 수 없습니다.");
         }
 
         return "read_mail/show_sentmessage";
     }
-
 
     @GetMapping("/download")
     public ResponseEntity<Resource> download(@RequestParam("userid") String userId,

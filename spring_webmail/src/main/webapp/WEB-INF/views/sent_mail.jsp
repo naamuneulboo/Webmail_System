@@ -40,14 +40,15 @@
                 <tbody>
                     <%
                         String userid = (String) session.getAttribute("userid");
+                        int rowNumber = 1;
                     %>
                     <c:forEach var="row" items="${dataRows}" varStatus="status">
                         <c:if test="${row.from == userid}">
                             <tr>
-                                <td>${status.count}</td>
+                                <td><%= rowNumber++ %></td>
                                 <td>${row.from}</td>
                                 <td>${row.to}</td>
-                                <td>${row.subject}</td>
+                                 <td><a href="show_sentmessage?messageId=${row.messageId}">${row.subject}</a></td>
                                 <td>${row.date}</td>
                                 <td>
                                      <form action="${pageContext.request.contextPath}/deletesentMessage" method="post" style="display:inline;">

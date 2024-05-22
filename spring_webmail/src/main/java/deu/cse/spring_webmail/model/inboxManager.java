@@ -112,8 +112,8 @@ public class inboxManager {
                     date = date.substring(0, date.length() - 11).trim(); // 끝에서 8글자 제거
                 }
 
-                if (from != null && from.contains("@")) {
-                    from = from.substring(0, from.indexOf("@"));
+                if (to != null && to.contains("@")) {
+                    to = to.substring(0, to.indexOf("@"));
                 }
 
                 dataList.add(new inboxRow(from, to, subject, date, messageId));
@@ -186,5 +186,49 @@ public class inboxManager {
         }
     }
 
+    public String getMessageById(String messageId) {
+        final String JDBC_URL = String.format("jdbc:mysql://%s:%s/webmail?serverTimezone=Asia/Seoul",
+                mysqlServerIp, mysqlServerPort);
+
+        log.debug("JDBC_URL: {}", JDBC_URL);
+
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+
+        try {
+            Class.forName(jdbcDriver);
+            conn = DriverManager.getConnection(JDBC_URL, this.userName, this.password);
+
+            String sql = "SELECT message_body FROM inbox WHERE message_body LIKE ?";
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, "%" + messageId + "%");
+
+            rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                String messageBody = rs.getString("message_body");
+                return messageBody;
+            }
+
+        } catch (Exception ex) {
+            log.error("오류가 발생했습니다. (발생오류: {})", ex.getMessage());
+        } finally {
+            try {
+                if (rs != null) {
+                    rs.close();
+                }
+                if (pstmt != null) {
+                    pstmt.close();
+                }
+                if (conn != null) {
+                    conn.close();
+                }
+            } catch (Exception ex) {
+                log.error("자원 해제 중 오류가 발생했습니다. (발생오류: {})", ex.getMessage());
+            }
+        }
+        return null;
+    }
 
 }
