@@ -28,7 +28,7 @@ public class inboxManager {
     private String jdbcDriver;
 
     public inboxManager() {
-        log.debug("AddrBookManager(): mysqlServerIp = {} jdbcDriver = {}", mysqlServerIp, jdbcDriver);
+        log.debug("inboxManager(): mysqlServerIp = {} jdbcDriver = {}", mysqlServerIp, jdbcDriver);
     }
 
     public inboxManager(String mysqlServerIp, String mysqlServerPort, String userName, String password,
@@ -38,7 +38,7 @@ public class inboxManager {
         this.userName = userName;
         this.password = password;
         this.jdbcDriver = jdbcDriver;
-        log.debug("AddrBookManager(): mysqlServerIp = {} jdbcDriver = {}", mysqlServerIp, jdbcDriver);
+        log.debug("inboxManager(): mysqlServerIp = {} jdbcDriver = {}", mysqlServerIp, jdbcDriver);
     }
 
     public List<inboxRow> getAllRows() {
