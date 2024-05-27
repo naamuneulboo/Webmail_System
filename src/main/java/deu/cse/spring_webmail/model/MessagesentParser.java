@@ -26,7 +26,25 @@ public class MessagesentParser {
         messageDetails.put("date", removeTimezone(extractField(messageBody, "Date: ")));
         messageDetails.put("subject", extractField(messageBody, "Subject: "));
         messageDetails.put("content", extractContent(messageBody));
+        // 첨부 파일 목록 추출
+        messageDetails.put("attachments", extractAttachments(messageBody));
         return messageDetails;
+    }
+
+    private static String extractAttachments(String messageBody) {
+        StringBuilder attachments = new StringBuilder();
+        // 첨부 파일 패턴 정의 (예: <a href="attachment1.pdf">attachment1.pdf</a>)
+        Pattern attachmentPattern = Pattern.compile("<a href=\"([^\"]+)\">([^<]+)</a>");
+        Matcher matcher = attachmentPattern.matcher(messageBody);
+        while (matcher.find()) {
+            String attachmentName = matcher.group(2); // 첨부 파일 이름 추출
+            attachments.append(attachmentName).append(", "); // 첨부 파일 이름 추가
+        }
+        // 마지막 쉼표 제거
+        if (attachments.length() > 0) {
+            attachments.setLength(attachments.length() - 2);
+        }
+        return attachments.toString();
     }
 
     private static String extractField(String messageBody, String fieldName) {

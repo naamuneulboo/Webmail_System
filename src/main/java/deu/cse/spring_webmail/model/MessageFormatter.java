@@ -57,11 +57,12 @@ public class MessageFormatter {
                 + " <th> 삭제 </td>   "
                 + " </tr>");
 
-        for (int i = messages.length - 1; i >= 0; i--) {
+         for (int i = 0; i < messages.length; i++) {
             MessageParser parser = new MessageParser(messages[i], userid);
             parser.parse(false);  // envelope 정보만 필요
             
-            int actualIndex = totalMessages - (startIndex + i) + 1;
+            //인덱스 번호 내림차순
+            int actualIndex = totalMessages - (startIndex + (messages.length -1 -i)) +1;
             // 메시지 헤더 포맷
             // 추출한 정보를 출력 포맷 사용하여 스트링으로 만들기
             buffer.append("<tr> "
