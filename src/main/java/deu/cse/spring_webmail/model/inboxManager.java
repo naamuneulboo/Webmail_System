@@ -4,21 +4,15 @@
  */
 package deu.cse.spring_webmail.model;
 
-import static com.mysql.cj.conf.PropertyKey.PASSWORD;
-import static jakarta.mail.Flags.Flag.USER;
-import static java.lang.System.out;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import static java.time.InstantSource.system;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
@@ -28,36 +22,7 @@ import java.util.regex.Matcher;
  * @author jshpr
  */
 @Slf4j
-public class inboxManager {  // 보낸 메일함 모델 !!
-
-    @NonNull
-    @Getter
-    @Setter
-    private String userid;
-    @Getter
-    @Setter
-    private String toAddress;
-    @Getter
-    @Setter
-    private String fromAddress;
-    @Getter
-    @Setter
-    private String ccAddress;
-    @Getter
-    @Setter
-    private String sentDate;
-    @Getter
-    @Setter
-    private String subject;
-    @Getter
-    @Setter
-    private String body;
-    @Getter
-    @Setter
-    private String fileName;
-    @Getter
-    @Setter
-    private String downloadTempDir = "C:/temp/download/";
+public class inboxManager {
 
     private String mysqlServerIp;
     private String mysqlServerPort;
@@ -81,7 +46,7 @@ public class inboxManager {  // 보낸 메일함 모델 !!
 
     public List<inboxRow> getAllRows() {
         List<inboxRow> dataList = new ArrayList<>();
-        final String JDBC_URL = String.format("jdbc:mysql://%s:%s/webmail?serverTimezone=Asia/Seoul",
+        final String JDBC_URL = String.format("jdbc:mysql://%s:%s/webmail?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Seoul",
                 mysqlServerIp, mysqlServerPort);
 
         log.debug("JDBC_URL: {}", JDBC_URL);
@@ -140,17 +105,22 @@ public class inboxManager {  // 보낸 메일함 모델 !!
     }
 
     private String extractField(String messageBody, String fieldName) {
-        String patternString = fieldName + "\\s*([^\\n]*)";
+        String patternString = fieldName + "([^\\n]*)";
         Pattern pattern = Pattern.compile(patternString);
         Matcher matcher = pattern.matcher(messageBody);
         if (matcher.find()) {
-            return matcher.group(1).trim();
+            String fieldValue = matcher.group(1).trim();
+            // Check if the field value is Base64 encoded
+            if (fieldValue.matches("=\\?([^?]+)\\?B\\?([^?]+)\\?=")) {
+                return decodeBase64(fieldValue);
+            }
+            return fieldValue;
         }
         return "";
     }
 
     public boolean deleteMessageById(String messageId) {
-        final String JDBC_URL = String.format("jdbc:mysql://%s:%s/webmail?serverTimezone=Asia/Seoul",
+        final String JDBC_URL = String.format("jdbc:mysql://%s:%s/webmail?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Seoul",
                 mysqlServerIp, mysqlServerPort);
 
         log.debug("JDBC_URL: {}", JDBC_URL);
@@ -187,7 +157,7 @@ public class inboxManager {  // 보낸 메일함 모델 !!
     }
 
     public String getMessageById(String messageId) {
-        final String JDBC_URL = String.format("jdbc:mysql://%s:%s/webmail?serverTimezone=Asia/Seoul",
+        final String JDBC_URL = String.format("jdbc:mysql://%s:%s/webmail?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Seoul",
                 mysqlServerIp, mysqlServerPort);
 
         log.debug("JDBC_URL: {}", JDBC_URL);
@@ -229,6 +199,29 @@ public class inboxManager {  // 보낸 메일함 모델 !!
             }
         }
         return null;
+    }
+
+    private String decodeBase64(String encoded) {
+        try {
+            if (encoded.matches("=\\?([^?]+)\\?B\\?([^?]+)\\?=")) {
+                Pattern pattern = Pattern.compile("=\\?([^?]+)\\?B\\?([^?]+)\\?=");
+                Matcher matcher = pattern.matcher(encoded);
+                if (matcher.find()) {
+                    String charset = matcher.group(1);
+                    String base64Content = matcher.group(2);
+                    byte[] decodedBytes = Base64.getDecoder().decode(base64Content);
+                    return new String(decodedBytes, Charset.forName(charset));
+                }
+            } else {
+                // Assume the string is directly Base64 encoded without any charset information
+                byte[] decodedBytes = Base64.getDecoder().decode(encoded);
+                return new String(decodedBytes, StandardCharsets.UTF_8);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return encoded;
+        }
+        return encoded;
     }
 
 }
