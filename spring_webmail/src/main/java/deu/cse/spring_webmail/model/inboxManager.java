@@ -4,11 +4,14 @@
  */
 package deu.cse.spring_webmail.model;
 
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import java.util.regex.Pattern;
@@ -102,11 +105,16 @@ public class inboxManager {
     }
 
     private String extractField(String messageBody, String fieldName) {
-        String patternString = fieldName + "\\s*([^\\n]*)";
+        String patternString = fieldName + "([^\\n]*)";
         Pattern pattern = Pattern.compile(patternString);
         Matcher matcher = pattern.matcher(messageBody);
         if (matcher.find()) {
-            return matcher.group(1).trim();
+            String fieldValue = matcher.group(1).trim();
+            // Check if the field value is Base64 encoded
+            if (fieldValue.matches("=\\?([^?]+)\\?B\\?([^?]+)\\?=")) {
+                return decodeBase64(fieldValue);
+            }
+            return fieldValue;
         }
         return "";
     }
@@ -191,6 +199,29 @@ public class inboxManager {
             }
         }
         return null;
+    }
+
+    private String decodeBase64(String encoded) {
+        try {
+            if (encoded.matches("=\\?([^?]+)\\?B\\?([^?]+)\\?=")) {
+                Pattern pattern = Pattern.compile("=\\?([^?]+)\\?B\\?([^?]+)\\?=");
+                Matcher matcher = pattern.matcher(encoded);
+                if (matcher.find()) {
+                    String charset = matcher.group(1);
+                    String base64Content = matcher.group(2);
+                    byte[] decodedBytes = Base64.getDecoder().decode(base64Content);
+                    return new String(decodedBytes, Charset.forName(charset));
+                }
+            } else {
+                // Assume the string is directly Base64 encoded without any charset information
+                byte[] decodedBytes = Base64.getDecoder().decode(encoded);
+                return new String(decodedBytes, StandardCharsets.UTF_8);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return encoded;
+        }
+        return encoded;
     }
 
 }
