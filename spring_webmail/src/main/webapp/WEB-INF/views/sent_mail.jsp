@@ -54,6 +54,7 @@
                                      <form action="${pageContext.request.contextPath}/deletesentMessage" method="post" style="display:inline;">
                                         <input type="hidden" name="messageId" value="${row.messageId}" />
                                         <input type="submit" value="삭제" />
+                                    </form>
                                 </td>
                             </tr>
                         </c:if>

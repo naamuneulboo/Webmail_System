@@ -61,7 +61,7 @@ td#subject {
 }
 
 #login_fail {
-    color: fuchsia;
+    color: black;
     margin: 100px 200px 100px 200px;
     padding: 50px;
     line-height: 200%;
@@ -91,7 +91,8 @@ td#subject {
 }
 
 #msgBody {
-    background-color: yellow;
+    background-color: whitesmoke;
+    border: 2px solid black;
 }
 
 a:link {

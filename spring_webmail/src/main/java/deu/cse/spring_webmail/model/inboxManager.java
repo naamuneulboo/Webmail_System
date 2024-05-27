@@ -4,12 +4,21 @@
  */
 package deu.cse.spring_webmail.model;
 
+import static com.mysql.cj.conf.PropertyKey.PASSWORD;
+import static jakarta.mail.Flags.Flag.USER;
+import static java.lang.System.out;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import static java.time.InstantSource.system;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
@@ -21,6 +30,35 @@ import java.util.regex.Matcher;
 @Slf4j
 public class inboxManager {
 
+    @NonNull
+    @Getter
+    @Setter
+    private String userid;
+    @Getter
+    @Setter
+    private String toAddress;
+    @Getter
+    @Setter
+    private String fromAddress;
+    @Getter
+    @Setter
+    private String ccAddress;
+    @Getter
+    @Setter
+    private String sentDate;
+    @Getter
+    @Setter
+    private String subject;
+    @Getter
+    @Setter
+    private String body;
+    @Getter
+    @Setter
+    private String fileName;
+    @Getter
+    @Setter
+    private String downloadTempDir = "C:/temp/download/";
+
     private String mysqlServerIp;
     private String mysqlServerPort;
     private String userName;
@@ -28,7 +66,7 @@ public class inboxManager {
     private String jdbcDriver;
 
     public inboxManager() {
-        log.debug("inboxManager(): mysqlServerIp = {} jdbcDriver = {}", mysqlServerIp, jdbcDriver);
+        log.debug("AddrBookManager(): mysqlServerIp = {} jdbcDriver = {}", mysqlServerIp, jdbcDriver);
     }
 
     public inboxManager(String mysqlServerIp, String mysqlServerPort, String userName, String password,
@@ -38,7 +76,7 @@ public class inboxManager {
         this.userName = userName;
         this.password = password;
         this.jdbcDriver = jdbcDriver;
-        log.debug("inboxManager(): mysqlServerIp = {} jdbcDriver = {}", mysqlServerIp, jdbcDriver);
+        log.debug("AddrBookManager(): mysqlServerIp = {} jdbcDriver = {}", mysqlServerIp, jdbcDriver);
     }
 
     public List<inboxRow> getAllRows() {

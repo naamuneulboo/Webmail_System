@@ -12,12 +12,15 @@ import java.net.Socket;
 import java.util.LinkedList;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Bean;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author jongmin
  */
 @Slf4j
+@Component
 public class UserAdminAgent {
 
     private String server;
@@ -33,14 +36,17 @@ public class UserAdminAgent {
     private final String EOL = "\r\n";
     private String cwd;
 
+    public UserAdminAgent() {
+    }
+    
     public UserAdminAgent(String server, int port, String cwd,
             String root_id, String root_pass, String admin_id) {
         log.debug("UserAdminAgent created: server = " + server + ", port = " + port);
         this.server = server;  // 127.0.0.1
         this.port = port;  // 4555
         this.cwd = cwd;
-        this.ROOT_ID = root_id;
-        this.ROOT_PASSWORD = root_pass;
+        this.ROOT_ID = root_id;  // root
+        this.ROOT_PASSWORD = root_pass;  // root
         this.ADMIN_ID = admin_id;
 
         log.debug("isConnected = {}, root.id = {}", isConnected, ROOT_ID);
@@ -105,7 +111,7 @@ public class UserAdminAgent {
             return status;
         }
     }  // addUser()
-
+    @Bean
     public List<String> getUserList() {
         List<String> userList = new LinkedList<String>();
         byte[] messageBuffer = new byte[1024];
@@ -296,7 +302,8 @@ public class UserAdminAgent {
             return status;
         }
     }
-        public boolean changeUserpassword(String[] userList, String newPassword) {
+    
+    public boolean changeUserpassword(String[] userList, String newPassword) {
         boolean status = false;
         byte[] messageBuffer = new byte[1024];
 

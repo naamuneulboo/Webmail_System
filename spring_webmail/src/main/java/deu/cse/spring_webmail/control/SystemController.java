@@ -58,8 +58,6 @@ public class SystemController {
     @Value("${james.host}")
     private String JAMES_HOST;
 
-
-    
     @GetMapping("/")
     public String index() {
         log.debug("index() called...");
@@ -135,17 +133,23 @@ public class SystemController {
     }
 
     @GetMapping("/main_menu")
-    public String mainMenu(Model model) {
+    public String mainMenu(Model model, @RequestParam(name = "page", defaultValue = "1") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size) {
+
         Pop3Agent pop3 = new Pop3Agent();
         pop3.setHost((String) session.getAttribute("host"));
         pop3.setUserid((String) session.getAttribute("userid"));
         pop3.setPassword((String) session.getAttribute("password"));
 
-        String messageList = pop3.getMessageList();
+        String messageList = pop3.getMessageList(page, size);
+        int totalMessages = pop3.getTotalMessageCount();
+        int totalPages = (int) Math.ceil((double) totalMessages / size);
+
         model.addAttribute("messageList", messageList);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", totalPages);
         return "main_menu";
     }
-
 
     @GetMapping("/admin_menu")
     public String adminMenu(Model model) {
@@ -161,6 +165,29 @@ public class SystemController {
         return "admin/add_user";
     }
 
+    @GetMapping("/change_user_password")
+    public String changeUser(Model model) {
+        log.debug("change_user called");
+        model.addAttribute("userList", getUserList());
+        return "admin/change_user_password";
+    }
+
+    @PostMapping("change_user_password.do")
+    public String changeUserpasswordDo(@RequestParam String[] selectedUsers, @RequestParam String newPassword, RedirectAttributes attrs) {
+        log.debug("change_user_password.do: selectedUser = {}", List.of(selectedUsers));
+
+        try {
+            String cwd = ctx.getRealPath(".");
+            UserAdminAgent agent = new UserAdminAgent(JAMES_HOST, JAMES_CONTROL_PORT, cwd,
+                    ROOT_ID, ROOT_PASSWORD, ADMINISTRATOR);
+            agent.changeUserpassword(selectedUsers, newPassword);
+        } catch (Exception ex) {
+            log.error("change_user_password.do : 예외 = {}", ex);
+        }
+
+        return "redirect:/admin_menu";
+    }
+
     @PostMapping("/add_user.do")
     public String addUserDo(@RequestParam String id, @RequestParam String password,
             RedirectAttributes attrs) {
@@ -172,8 +199,6 @@ public class SystemController {
             UserAdminAgent agent = new UserAdminAgent(JAMES_HOST, JAMES_CONTROL_PORT, cwd,
                     ROOT_ID, ROOT_PASSWORD, ADMINISTRATOR);
 
-            // if (addUser successful)  사용자 등록 성공 팦업창
-            // else 사용자 등록 실패 팝업창
             if (agent.addUser(id, password)) {
                 attrs.addFlashAttribute("msg", String.format("사용자(%s) 추가를 성공하였습니다.", id));
             } else {
@@ -186,7 +211,29 @@ public class SystemController {
         return "redirect:/admin_menu";
     }
 
- 
+    @PostMapping("/user_sign_up.do")
+    public String UserSignUpDo(@RequestParam String id, @RequestParam String password,
+            RedirectAttributes attrs) {
+        log.debug("user_sign_up.do: id = {}, password = {}, port = {}",
+                id, password, JAMES_CONTROL_PORT);
+
+        try {
+            String cwd = ctx.getRealPath(".");
+            UserAdminAgent agent = new UserAdminAgent(JAMES_HOST, JAMES_CONTROL_PORT, cwd,
+                    ROOT_ID, ROOT_PASSWORD, ADMINISTRATOR);
+
+            if (agent.addUser(id, password)) {
+                attrs.addFlashAttribute("msg", String.format("%s 님. 회원가입에 성공하셨습니다!", id));
+            } else {
+                attrs.addFlashAttribute("msg", String.format("%s 님. 회원가입에 실패하셨습니다.", id));
+            }
+
+        } catch (Exception ex) {
+            log.error("user_sign_up.do: 시스템 접속에 실패했습니다. 예외 = {}", ex.getMessage());
+        }
+
+        return "redirect:/";
+    }
 
     @GetMapping("/delete_user")
     public String deleteUser(Model model) {
@@ -212,29 +259,6 @@ public class SystemController {
             agent.deleteUsers(selectedUsers);  // 수정!!!
         } catch (Exception ex) {
             log.error("delete_user.do : 예외 = {}", ex);
-        }
-
-        return "redirect:/admin_menu";
-    }
-    
-    @GetMapping("/change_user_password")
-    public String changeUser(Model model) {
-        log.debug("change_user called");
-        model.addAttribute("userList", getUserList());
-        return "admin/change_user_password";
-    }
-
-    @PostMapping("change_user_password.do")
-    public String changeUserpasswordDo(@RequestParam String[] selectedUsers,@RequestParam String newPassword, RedirectAttributes attrs) {
-        log.debug("change_user_password.do: selectedUser = {}", List.of(selectedUsers));
-
-        try {
-            String cwd = ctx.getRealPath(".");
-            UserAdminAgent agent = new UserAdminAgent(JAMES_HOST, JAMES_CONTROL_PORT, cwd,
-                    ROOT_ID, ROOT_PASSWORD, ADMINISTRATOR);
-            agent.changeUserpassword(selectedUsers,newPassword);  
-        } catch (Exception ex) {
-            log.error("change_user_password.do : 예외 = {}", ex);
         }
 
         return "redirect:/admin_menu";

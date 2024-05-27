@@ -18,7 +18,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import java.io.PrintWriter;
 import java.util.List;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
@@ -56,6 +58,7 @@ public class ReadController {
     private HttpServletRequest request;
     @Value("${file.download_folder}")
     private String DOWNLOAD_FOLDER;
+
     @Autowired
     private Environment env;
 
@@ -63,24 +66,6 @@ public class ReadController {
     private String mysqlServerIp;
     @Value("${mysql.server.port}")
     private String mysqlServerPort;
-
-    @GetMapping("/show_message")
-    public String showMessage(@RequestParam Integer msgid, Model model) {
-        log.debug("download_folder = {}", DOWNLOAD_FOLDER);
-
-        Pop3Agent pop3 = new Pop3Agent();
-        pop3.setHost((String) session.getAttribute("host"));
-        pop3.setUserid((String) session.getAttribute("userid"));
-        pop3.setPassword((String) session.getAttribute("password"));
-        pop3.setRequest(request);
-
-        String msg = pop3.getMessage(msgid);
-        session.setAttribute("sender", pop3.getSender());  // 220612 LJM - added
-        session.setAttribute("subject", pop3.getSubject());
-        session.setAttribute("body", pop3.getBody());
-        model.addAttribute("msg", msg);
-        return "/read_mail/show_message";
-    }
 
     @GetMapping("/sent_mail")
     public String sentmail(Model model) {
@@ -101,9 +86,28 @@ public class ReadController {
 
         return "sent_mail";
     }
+    @PostMapping("/deletesentMessage")
+    public String deleteMessage(@RequestParam("messageId") String messageId, Model model) {
+        String userName = env.getProperty("spring.datasource.username");
+        String password = env.getProperty("spring.datasource.password");
+        String jdbcDriver = env.getProperty("spring.datasource.driver-class-name");
+        String mysqlServerIp = env.getProperty("mysql.server.ip");
+        String mysqlServerPort = env.getProperty("mysql.server.port");
+
+        inboxManager manager = new inboxManager(mysqlServerIp, mysqlServerPort, userName, password, jdbcDriver);
+        boolean isDeleted = manager.deleteMessageById(messageId);
+
+        if (isDeleted) {
+            model.addAttribute("msg", "메시지가 성공적으로 삭제되었습니다.");
+        } else {
+            model.addAttribute("msg", "메시지 삭제 실패.");
+        }
+
+        return "redirect:/sent_mail";
+    }
 
     @GetMapping("/show_sentmessage")
-    public String deleteMessage(@RequestParam("messageId") String messageId, Model model) {
+    public String showsentMessage(@RequestParam("messageId") String messageId, Model model) {
 
         Pop3Agent pop3 = new Pop3Agent();
         pop3.setHost((String) session.getAttribute("host"));
@@ -127,6 +131,25 @@ public class ReadController {
         }
 
         return "read_mail/show_sentmessage";
+    }
+
+    @GetMapping("/show_message")
+    public String showMessage(@RequestParam Integer msgid, Model model) {
+        log.debug("download_folder = {}", DOWNLOAD_FOLDER);
+
+        Pop3Agent pop3 = new Pop3Agent();
+        pop3.setHost((String) session.getAttribute("host"));
+        pop3.setUserid((String) session.getAttribute("userid"));
+        pop3.setPassword((String) session.getAttribute("password"));
+        pop3.setRequest(request);
+
+        String msg = pop3.getMessage(msgid);
+        session.setAttribute("sender", pop3.getSender());  // 220612 LJM - added
+        session.setAttribute("subject", pop3.getSubject());
+        session.setAttribute("body", pop3.getBody());
+        model.addAttribute("msg", msg);
+        model.addAttribute("msgid", msgid);
+        return "/read_mail/show_message";
     }
 
     @GetMapping("/download")
@@ -172,10 +195,62 @@ public class ReadController {
         return new ResponseEntity<>(resource, headers, HttpStatus.OK);
     }
 
-    @GetMapping("/delete_mail.do")
+    /*@GetMapping("/download")
+    public ResponseEntity<Resource> download(@RequestParam("userid") String userId,
+            @RequestParam("filename") String fileName) {
+        log.debug("userid = {}, filename = {}", userId, fileName);
+        try {
+            log.debug("userid = {}, filename = {}", userId, MimeUtility.decodeText(fileName));
+        } catch (UnsupportedEncodingException ex) {
+            log.error("error");
+        }
+
+        // 1. 내려받기할 파일의 기본 경로 설정
+        String basePath = ctx.getRealPath(DOWNLOAD_FOLDER) + File.separator + userId;
+
+        // 2. 파일을 File 객체로 가져오기
+        File file = new File(basePath, fileName);
+
+        // 3. 파일이 존재하는지 확인
+        if (!file.exists()) {
+            log.error("File {} does not exist", file.getAbsolutePath());
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        // 4. Http 헤더 생성
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentDisposition(
+                ContentDisposition.builder("attachment").filename(fileName, StandardCharsets.UTF_8).build());
+
+        // 5. 파일을 리소스로 변환
+        Resource resource = new FileSystemResource(file);
+
+        return new ResponseEntity<>(resource, headers, HttpStatus.OK);
+    }*/
+ /*@GetMapping("/delete_mail.do")
     public String deleteMailDo(@RequestParam("msgid") Integer msgId, RedirectAttributes attrs) {
         log.debug("delete_mail.do: msgid = {}", msgId);
+        
+        String host = (String) session.getAttribute("host");
+        String userid = (String) session.getAttribute("userid");
+        String password = (String) session.getAttribute("password");
 
+        Pop3Agent pop3 = new Pop3Agent(host, userid, password);
+        
+        
+        boolean deleteSuccessful = pop3.deleteMessage(msgId, true);
+        if (deleteSuccessful) {
+            attrs.addFlashAttribute("msg", "메시지 삭제를 성공하였습니다.");
+        } else {
+            attrs.addFlashAttribute("msg", "메시지 삭제를 실패하였습니다.");
+        }
+        
+        return "redirect:main_menu";
+    }*/
+     @GetMapping("/delete_mail.do")
+    public String deleteMailDo(@RequestParam("msgid") Integer msgId, RedirectAttributes attrs) {
+        log.debug("delete_mail.do: msgid = {}", msgId);
+        
         String host = (String) session.getAttribute("host");
         String userid = (String) session.getAttribute("userid");
         String password = (String) session.getAttribute("password");
@@ -187,8 +262,10 @@ public class ReadController {
         } else {
             attrs.addFlashAttribute("msg", "메시지 삭제를 실패하였습니다.");
         }
-
+        
         return "redirect:main_menu";
     }
+
+   
 
 }
