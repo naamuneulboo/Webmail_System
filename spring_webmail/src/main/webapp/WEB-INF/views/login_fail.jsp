@@ -1,7 +1,7 @@
 <%-- 
     Document   : login_fail
-    Created on : 2022. 6. 10., 오후 3:28:28
-    Author     : skylo
+    Created on : 2024. 5. 27., 오후 11:21:56
+    Author     : 이가연
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>

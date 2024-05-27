@@ -47,22 +47,31 @@ public class WriteController {
         log.debug("write_mail called...");
         session.removeAttribute("sender");  // 220612 LJM - 메일 쓰기 시는 
         return "write_mail/write_mail";
+    } 
+    
+    @GetMapping("/write_mail_tome")
+    public String writeMailtome(){
+        log.debug("write_mail called...");
+        session.removeAttribute("sender");
+        return "write_mail/write_mail_tome";
     }
 
-    /* @PostMapping("/write_mail.do")
-    public String writeMailDo(@RequestParam String to, @RequestParam String cc,
-            @RequestParam String subj, @RequestParam String body,
-            @RequestParam(name = "files") MultipartFile[] upFiles,
-            RedirectAttributes attrs) {
-        log.debug("write_mail.do: to = {}, cc = {}, subj = {}, body = {}, files count = {}",
-                to, cc, subj, body, upFiles.length);
-
+    @PostMapping("/write_mail_tome.do")
+    public String writeMailtomeDo(@RequestParam String cc,
+                              @RequestParam String subj, @RequestParam String body,
+                              @RequestParam(name="file1") MultipartFile[] upFiles,
+                              RedirectAttributes attrs) {
+        String user = (String) session.getAttribute("userid");
+        log.info("to : " + user + "cc" + cc + "subj" + subj);
+        //메일 제목이 공란인 경우
+        if(subj.replaceAll("\\p{Z}", "").length()==0) {
+            subj = "제목 없음";
+        }
+        
         // 파일 업로드 처리
         for (MultipartFile upFile : upFiles) {
             if (!upFile.isEmpty()) {
                 String basePath = ctx.getRealPath(UPLOAD_FOLDER);
-                String fileName = upFile.getOriginalFilename(); // 첨부 파일의 이름 가져오기
-                log.debug("{} 파일을 {} 폴더에 저장...", fileName, basePath); //첨부파일명 로그
                 log.debug("{} 파일을 {} 폴더에 저장...", upFile.getOriginalFilename(), basePath);
                 File f = new File(basePath + File.separator + upFile.getOriginalFilename());
                 try (BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(f))) {
@@ -72,17 +81,16 @@ public class WriteController {
                 }
             }
         }
-
-        boolean sendSuccessful = sendMessage(to, cc, subj, body, upFiles);
+        boolean sendSuccessful = sendMessage(user, cc, subj, body, upFiles);
         if (sendSuccessful) {
             attrs.addFlashAttribute("msg", "메일 전송이 성공했습니다.");
         } else {
             attrs.addFlashAttribute("msg", "메일 전송이 실패했습니다.");
         }
 
-      
         return "redirect:/main_menu";
-    }*/
+    }
+    
     @PostMapping("/write_mail.do")
     public String writeMailDo(@RequestParam String to, @RequestParam String cc,
             @RequestParam String subj, @RequestParam String body,
@@ -117,14 +125,6 @@ public class WriteController {
         } else {
             attrs.addFlashAttribute("msg", "메일 전송이 실패했습니다.");
         }
-/*
-        // 첨부 파일 목록을 모델에 추가하여 뷰로 전달
-        List<String> attachments = Arrays.stream(upFiles)
-                .filter(file -> !file.isEmpty())
-                .map(MultipartFile::getOriginalFilename)
-                .collect(Collectors.toList());
-        model.addAttribute("attachments", attachments);
-*/
         return "redirect:/main_menu";
     }
 

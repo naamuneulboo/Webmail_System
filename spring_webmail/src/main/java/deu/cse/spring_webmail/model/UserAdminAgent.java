@@ -12,15 +12,12 @@ import java.net.Socket;
 import java.util.LinkedList;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Bean;
-import org.springframework.stereotype.Component;
 
 /**
  *
  * @author jongmin
  */
 @Slf4j
-@Component
 public class UserAdminAgent {
 
     private String server;
@@ -36,9 +33,6 @@ public class UserAdminAgent {
     private final String EOL = "\r\n";
     private String cwd;
 
-    public UserAdminAgent() {
-    }
-    
     public UserAdminAgent(String server, int port, String cwd,
             String root_id, String root_pass, String admin_id) {
         log.debug("UserAdminAgent created: server = " + server + ", port = " + port);
@@ -111,7 +105,7 @@ public class UserAdminAgent {
             return status;
         }
     }  // addUser()
-    @Bean
+
     public List<String> getUserList() {
         List<String> userList = new LinkedList<String>();
         byte[] messageBuffer = new byte[1024];

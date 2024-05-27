@@ -14,7 +14,7 @@ import lombok.Getter;
  */
 @AllArgsConstructor
 @Builder
-public class inboxRow {
+public class inboxRow {  // 보낸 메일함 모델 !!
     @Getter
     private String from;
     @Getter

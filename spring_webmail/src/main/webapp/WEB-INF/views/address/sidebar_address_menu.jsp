@@ -18,12 +18,10 @@
 
         <span style="color: indigo"> <strong>사용자: <%= session.getAttribute("userid") %> </strong> </span> <br>
 
-        <p> <a href="main_menu"> 메일 읽기 </a> </p>
-        <p> <a href="sent_mail"> 보낸 메일 </a> </p>
-        <p> <a href="write_mail"> 메일 쓰기 </a> </p>
-        <p> <a href="write_mail_tome"> 내게 쓰기 </a> </p>
-        <p> <a href="mail_tome"> 내게 쓴 메일함 </a> </p>
-        <p> <a href="showtable"> 주소록 </a> </p>
-        <p><a href="login.do?menu=<%= CommandType.LOGOUT %>">로그아웃</a></p>
+        <p> <a href="createadd"> 주소록 추가 </a> </p>
+        <p> <a href="delete_addrbook"> 주소록 삭제 </a> </p>
+        <p> <a href="update_addrbook"> 주소록 업데이트 </a> </p>
+        <p> <a href="javascript:history.back()"> 이전화면으로 </a> </p>       
+        <a href="main_menu"> 이전 메뉴로 </a>
     </body>
 </html>

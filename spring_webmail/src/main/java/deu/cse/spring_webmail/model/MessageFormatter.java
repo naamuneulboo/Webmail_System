@@ -82,38 +82,7 @@ public class MessageFormatter {
 //        return "MessageFormatter 테이블 결과";
     }
 
-    /*public String getMessage(Message message) {
-        StringBuilder buffer = new StringBuilder();
-
-        // MessageParser parser = new MessageParser(message, userid);
-        MessageParser parser = new MessageParser(message, userid, request);
-        parser.parse(true);
-        
-        sender = parser.getFromAddress();
-        subject = parser.getSubject();
-        body = parser.getBody();
-
-        buffer.append("보낸 사람: " + parser.getFromAddress() + " <br>");
-        buffer.append("받은 사람: " + parser.getToAddress() + " <br>");
-        buffer.append("Cc &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; : " + parser.getCcAddress() + " <br>");
-        buffer.append("보낸 날짜: " + parser.getSentDate() + " <br>");
-        buffer.append("제 &nbsp;&nbsp;&nbsp;  목: " + parser.getSubject() + " <br> <hr>");
-
-        buffer.append(parser.getBody());
-
-        String attachedFile = parser.getFileName();
-        if (attachedFile != null) {
-            buffer.append("<br> <hr> 첨부파일: <a href=download"
-                    + "?userid=" + this.userid
-                    + "&filename=" + attachedFile.replaceAll(" ", "%20")
-                    + " target=_top> " + attachedFile + "</a> <br>");
-        }
-
-        return buffer.toString();
-    }*/
     
-    
-    // 다중 첨부파일 수신 관련
     public String getMessage(Message message) {
         StringBuilder buffer = new StringBuilder();
 
