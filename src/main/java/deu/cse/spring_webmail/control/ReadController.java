@@ -86,6 +86,7 @@ public class ReadController {
         return "sent_mail";
     }
 
+    // 보낸 메일함 메일 삭제
     @GetMapping("/show_sentmessage")
     public String deleteMessage(@RequestParam("messageId") String messageId, Model model) {
 
@@ -132,6 +133,7 @@ public class ReadController {
         return "/read_mail/show_message";
     }
 
+    // 첨부파일 다운로드
     @GetMapping("/download")
     public ResponseEntity<Resource> download(@RequestParam("userid") String userId,
             @RequestParam("filename") String fileName) {
@@ -175,58 +177,7 @@ public class ReadController {
         return new ResponseEntity<>(resource, headers, HttpStatus.OK);
     }
 
-    /*@GetMapping("/download")
-    public ResponseEntity<Resource> download(@RequestParam("userid") String userId,
-            @RequestParam("filename") String fileName) {
-        log.debug("userid = {}, filename = {}", userId, fileName);
-        try {
-            log.debug("userid = {}, filename = {}", userId, MimeUtility.decodeText(fileName));
-        } catch (UnsupportedEncodingException ex) {
-            log.error("error");
-        }
-
-        // 1. 내려받기할 파일의 기본 경로 설정
-        String basePath = ctx.getRealPath(DOWNLOAD_FOLDER) + File.separator + userId;
-
-        // 2. 파일을 File 객체로 가져오기
-        File file = new File(basePath, fileName);
-
-        // 3. 파일이 존재하는지 확인
-        if (!file.exists()) {
-            log.error("File {} does not exist", file.getAbsolutePath());
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-
-        // 4. Http 헤더 생성
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentDisposition(
-                ContentDisposition.builder("attachment").filename(fileName, StandardCharsets.UTF_8).build());
-
-        // 5. 파일을 리소스로 변환
-        Resource resource = new FileSystemResource(file);
-
-        return new ResponseEntity<>(resource, headers, HttpStatus.OK);
-    }*/
- /*@GetMapping("/delete_mail.do")
-    public String deleteMailDo(@RequestParam("msgid") Integer msgId, RedirectAttributes attrs) {
-        log.debug("delete_mail.do: msgid = {}", msgId);
-        
-        String host = (String) session.getAttribute("host");
-        String userid = (String) session.getAttribute("userid");
-        String password = (String) session.getAttribute("password");
-
-        Pop3Agent pop3 = new Pop3Agent(host, userid, password);
-        
-        
-        boolean deleteSuccessful = pop3.deleteMessage(msgId, true);
-        if (deleteSuccessful) {
-            attrs.addFlashAttribute("msg", "메시지 삭제를 성공하였습니다.");
-        } else {
-            attrs.addFlashAttribute("msg", "메시지 삭제를 실패하였습니다.");
-        }
-        
-        return "redirect:main_menu";
-    }*/
+    // 메일 삭제
      @GetMapping("/delete_mail.do")
     public String deleteMailDo(@RequestParam("msgid") Integer msgId, RedirectAttributes attrs) {
         log.debug("delete_mail.do: msgid = {}", msgId);

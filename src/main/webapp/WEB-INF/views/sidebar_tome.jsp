@@ -14,6 +14,7 @@
 <span style="color: indigo"> <strong>사용자: <%= session.getAttribute("userid") %> </strong> </span> <br>
 
 <p> <a href="mail_tome"> 메일 읽기 </a> </p>
+<p><a href="main_menu"> 이전 메뉴로 </a></p>
 <p><a href="login.do?menu=<%= CommandType.LOGOUT %>">로그아웃</a></p>
 </body>
 </html>

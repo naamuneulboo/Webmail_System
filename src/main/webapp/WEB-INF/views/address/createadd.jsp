@@ -3,6 +3,7 @@
     Created on : 2024. 5. 27., 오후 11:22:27
     Author     : 이가연
 --%>
+
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <html>
 <head>
@@ -19,7 +20,9 @@
     </tr>
     <tr>
       <td><label for="email">이메일:</label></td>
-      <td><input type="email" id="email" name="email" required></td>
+      <td>
+        <input type="text" id="email" name="email" placeholder="@localhost의 앞부분만 입력해주세요" required>
+      </td>
     </tr>
     <tr>
       <td><label for="phone">전화번호:</label></td>

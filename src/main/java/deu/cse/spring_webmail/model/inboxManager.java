@@ -28,7 +28,7 @@ import java.util.regex.Matcher;
  * @author jshpr
  */
 @Slf4j
-public class inboxManager {
+public class inboxManager {  // 보낸 메일함 모델 !!
 
     @NonNull
     @Getter

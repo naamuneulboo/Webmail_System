@@ -125,14 +125,6 @@ public class WriteController {
         } else {
             attrs.addFlashAttribute("msg", "메일 전송이 실패했습니다.");
         }
-/*
-        // 첨부 파일 목록을 모델에 추가하여 뷰로 전달
-        List<String> attachments = Arrays.stream(upFiles)
-                .filter(file -> !file.isEmpty())
-                .map(MultipartFile::getOriginalFilename)
-                .collect(Collectors.toList());
-        model.addAttribute("attachments", attachments);
-*/
         return "redirect:/main_menu";
     }
 

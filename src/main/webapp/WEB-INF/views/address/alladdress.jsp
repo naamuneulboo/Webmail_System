@@ -3,13 +3,7 @@
     Created on : 2024. 5. 27., 오후 11:21:56
     Author     : 이가연
 --%>
-<%--
-  Created by IntelliJ IDEA.
-  User: 82103
-  Date: 2024-05-13
-  Time: 오후 10:47
-  To change this template use File | Settings | File Templates.
---%>
+
 <%@ page contentType="text/html" pageEncoding="utf-8" %>
 <%@ page import="java.sql.*" %>
 <%@ page import="java.sql.Connection" %>
@@ -21,9 +15,9 @@
 
 <%@taglib prefix="spring" uri="http://www.springframework.org/tags" %>
 
-<spring:eval expression="@environment.getProperty('spring.datasource.driver-class-name')" var="db_driver"/>
-<spring:eval expression="@environment.getProperty('spring.datasource.username')" var="db_username"/>
-<spring:eval expression="@environment.getProperty('spring.datasource.password')" var="db_password"/>
+<spring:eval expression="@environment.getProperty('spring.datasource.driver-class-name')" var="db_driver" />
+<spring:eval expression="@environment.getProperty('spring.datasource.username')" var="db_username" />
+<spring:eval expression="@environment.getProperty('spring.datasource.password')" var="db_password" />
 
 <spring:eval expression="@configProperties['mysql.server.ip']" var="mysqlServerIp"/>
 <spring:eval expression="@configProperties['mysql.server.port']" var="mysqlServerPort"/>

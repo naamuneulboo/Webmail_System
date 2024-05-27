@@ -160,6 +160,7 @@ public class SystemController {
         return "admin/admin_menu";
     }
 
+    // 내게 쓴 메일함
     @GetMapping("/mail_tome")
     public String tome(Model model){
         Pop3Agent pop3 = new Pop3Agent();

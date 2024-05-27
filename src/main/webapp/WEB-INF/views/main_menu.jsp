@@ -1,7 +1,7 @@
 <%-- 
     Document   : main_menu
-    Created on : 2022. 6. 10., 오후 3:15:45
-    Author     : skylo
+    Created on : 2024. 5. 27., 오후 11:21:56
+    Author     : 이가연
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>

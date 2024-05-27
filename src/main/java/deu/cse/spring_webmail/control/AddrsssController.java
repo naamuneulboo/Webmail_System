@@ -27,7 +27,7 @@ public class AddrsssController {
         return "address/alladdress";
     }
 
-    @GetMapping("/createadd")
+    @GetMapping("/createadd")  // 주소록 이동
     public String createAddress(Model model){
         model.addAttribute("mysql_server_ip",this.mysqlServerIP);
         model.addAttribute("mysql_server_port",this.mysqlServerPort);
@@ -35,7 +35,7 @@ public class AddrsssController {
         return "address/createadd";
     }
 
-    @PostMapping("/createadd")
+    @PostMapping("/createadd")  // 주소록 추가
     public String createAdd(Model model){
         model.addAttribute("mysql_server_ip",this.mysqlServerIP);
         model.addAttribute("mysql_server_port",this.mysqlServerPort);
