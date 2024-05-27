@@ -160,6 +160,18 @@ public class SystemController {
         return "admin/admin_menu";
     }
 
+    @GetMapping("/mail_tome")
+    public String tome(Model model){
+        Pop3Agent pop3 = new Pop3Agent();
+        pop3.setHost((String) session.getAttribute("host"));
+        pop3.setUserid((String) session.getAttribute("userid"));
+        pop3.setPassword((String) session.getAttribute("password"));
+
+        String messageList = pop3.getMyOwnMessages();
+        model.addAttribute("messageList", messageList);
+        return "tome";
+    }
+    
     @GetMapping("/add_user")
     public String addUser() {
         return "admin/add_user";

@@ -21,6 +21,8 @@
         <p> <a href="main_menu"> 메일 읽기 </a> </p>
         <p> <a href="sent_mail"> 보낸 메일 </a> </p>
         <p> <a href="write_mail"> 메일 쓰기 </a> </p>
+        <p> <a href="write_mail_tome"> 내게 쓰기 </a> </p>
+        <p> <a href="mail_tome"> 내게 쓴 메일함 </a> </p>
         <p><a href="login.do?menu=<%= CommandType.LOGOUT %>">로그아웃</a></p>
     </body>
 </html>

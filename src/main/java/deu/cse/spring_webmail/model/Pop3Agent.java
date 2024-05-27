@@ -4,6 +4,7 @@
  */
 package deu.cse.spring_webmail.model;
 
+import jakarta.mail.Address;
 import jakarta.mail.FetchProfile;
 import jakarta.mail.Flags;
 import jakarta.mail.Folder;
@@ -12,6 +13,8 @@ import jakarta.mail.Session;
 import jakarta.mail.Store;
 import java.util.Properties;
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -190,6 +193,56 @@ public class Pop3Agent {
             log.error("connectToStore 예외: {}", ex.getMessage());
         } finally {
             return status;
+        }
+    }
+    
+     public String getMyOwnMessages() {
+        String result = "";
+        Message[] messages = null;
+
+        if (!connectToStore()) {
+            log.error("POP3 connection failed!");
+            return "POP3 연결이 되지 않아 메일 목록을 볼 수 없습니다.";
+        }
+
+        try {
+            // 메일 폴더 열기
+            Folder folder = store.getFolder("INBOX");
+            folder.open(Folder.READ_ONLY);
+
+            // 현재 수신한 메시지 모두 가져오기
+            messages = folder.getMessages();
+            FetchProfile fp = new FetchProfile();
+            fp.add(FetchProfile.Item.ENVELOPE);
+            folder.fetch(messages, fp);
+
+            List<Message> myMessages = new ArrayList<>();
+            for (Message message : messages) {
+                Address[] fromAddresses = message.getFrom();
+                Address[] toAddresses = message.getRecipients(Message.RecipientType.TO);
+
+                if (fromAddresses != null && toAddresses != null) {
+                    for (Address from : fromAddresses) {
+                        for (Address to : toAddresses) {
+                            if (from.toString().equals(to.toString()) && from.toString().equals(userid)) {
+                                myMessages.add(message);
+                            }
+                        }
+                    }
+                }
+            }
+
+            Message[] myMessagesArray = myMessages.toArray(new Message[0]);
+            MessageFormatter formatter = new MessageFormatter(userid);
+            result = formatter.getMessageTable(myMessagesArray);
+
+            folder.close(true);
+            store.close();
+        } catch (Exception ex) {
+            log.error("Pop3Agent.getMyOwnMessages() : exception = {}", ex.getMessage());
+            result = "Pop3Agent.getMyOwnMessages() : exception = " + ex.getMessage();
+        } finally {
+            return result;
         }
     }
     
