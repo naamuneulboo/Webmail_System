@@ -1,9 +1,8 @@
 <%-- 
-    Document   : main_menu
-    Created on : 2024. 5. 27., 오후 11:21:56
+    Document   : tome
+    Created on : 2024. 5. 27., 오후 11:24:20
     Author     : 이가연
---%>
-
+--%> 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
@@ -14,18 +13,18 @@
 <!-- 제어기에서 처리하면 로직 관련 소스 코드 제거 가능!
 <jsp:useBean id="pop3" scope="page" class="deu.cse.spring_webmail.model.Pop3Agent" />
 <%
-            pop3.setHost((String) session.getAttribute("host"));
-            pop3.setUserid((String) session.getAttribute("userid"));
-            pop3.setPassword((String) session.getAttribute("password"));
+    pop3.setHost((String) session.getAttribute("host"));
+    pop3.setUserid((String) session.getAttribute("userid"));
+    pop3.setPassword((String) session.getAttribute("password"));
 %>
 -->
 
 <html>
-    <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>주메뉴 화면</title>
-        <link type="text/css" rel="stylesheet" href="css/main_style.css" />
-        <style>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>내게 쓴 메일함</title>
+    <link type="text/css" rel="stylesheet" href="css/main_style.css" />
+    <style>
             .messages {
                 margin-bottom: 20px;
             }
@@ -55,27 +54,25 @@
                 font-weight: bold;
             }
         </style>
-        <script>
-            <c:if test="${!empty msg}">
-            alert("${msg}");
-            </c:if>
-        </script>
-    </head>
-    <body>
-        <%@include file="header.jspf"%>
+    <script>
+        <c:if test="${!empty msg}">
+        alert("${msg}");
+        </c:if>
+    </script>
+</head>
+<body>
+<%@include file="header.jspf"%>
 
-        <div id="sidebar">
-            <jsp:include page="sidebar_menu.jsp" />
-        </div>
+<div id="sidebar">
+    <jsp:include page="sidebar_tome.jsp" />
+</div>
 
-        <!-- 메시지 삭제 링크를 누르면 바로 삭제되어 실수할 수 있음. 해결 방법은? -->
+<!-- 메시지 삭제 링크를 누르면 바로 삭제되어 실수할 수 있음. 해결 방법은? -->
+<div id="main">
+    ${messageList}
+</div>
 
-        <div id="main">
-            <div class="messages">
-                ${messageList}
-            </div>
-
-            <div class="pagination-container">
+    <div class="pagination-container">
                 <ul class="pagination">
                     <c:if test="${currentPage > 1}">
                         <li><a href="?page=${currentPage - 1}&size=${size}"><<</a></li>
@@ -90,8 +87,7 @@
                         </c:if>
                 </ul>
             </div>
-        </div>
-
-        <%@include file="footer.jspf"%>
-    </body>
-</html> 
+    
+<%@include file="footer.jspf"%>
+</body>
+</html>

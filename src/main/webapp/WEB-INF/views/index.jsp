@@ -1,7 +1,7 @@
 <%-- 
     Document   : index
-    Created on : 2022. 6. 10., 오후 2:19:43
-    Author     : skylo
+    Created on : 2024. 5. 27., 오후 11:21:56
+    Author     : 이가연
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
@@ -26,14 +26,23 @@
                 <input type="submit" value="로그인" name="B1">&nbsp;&nbsp;&nbsp;
                 <input type="reset" value="다시 입력" name="B2"> 
             </form>
+
         </div>
-        <!-- 회원가입 버튼 추가 -->
+
         <div id="register_button">
             <form method="GET" action="register">
                 <input type="submit" value="회원가입">
             </form>
+            &nbsp;&nbsp;⇑ ⇑ 웹 메일 시스템 회원가입 바로가기
         </div>
 
+        <div style="color:blue">
+            <c:if test="${not empty msg}">
+                <p>${msg}</p>
+            </c:if>
+        </div>   
+   
         <%@include file="footer.jspf"%>
     </body>
+
 </html>

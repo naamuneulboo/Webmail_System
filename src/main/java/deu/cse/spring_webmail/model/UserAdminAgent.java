@@ -39,8 +39,8 @@ public class UserAdminAgent {
         this.server = server;  // 127.0.0.1
         this.port = port;  // 4555
         this.cwd = cwd;
-        this.ROOT_ID = root_id;
-        this.ROOT_PASSWORD = root_pass;
+        this.ROOT_ID = root_id;  // root
+        this.ROOT_PASSWORD = root_pass;  // root
         this.ADMIN_ID = admin_id;
 
         log.debug("isConnected = {}, root.id = {}", isConnected, ROOT_ID);
@@ -296,4 +296,45 @@ public class UserAdminAgent {
             return status;
         }
     }
+    
+    public boolean changeUserpassword(String[] userList, String newPassword) {
+        boolean status = false;
+        byte[] messageBuffer = new byte[1024];
+
+        log.debug("changePassword() called");
+        if (!isConnected) {
+            return status;
+        }
+
+        try {
+            for (String userId : userList) {
+                // 1: "setpassword" command
+                String setPasswordCommand = "setpassword " + userId + " " + newPassword + EOL;
+                os.write(setPasswordCommand.getBytes());
+
+                // 2: response for "setpassword" command
+                java.util.Arrays.fill(messageBuffer, (byte) 0);
+                is.read(messageBuffer);
+                String recvMessage = new String(messageBuffer);
+                log.debug(recvMessage);
+
+                // 3: Check if password is changed successfully
+                if (recvMessage.contains("password changed")) {
+                    status = true;
+                } else {
+                    status = false;
+                }
+            }
+            // 4: Close connection
+            quit();
+            System.out.flush();  // for test
+            socket.close();
+        } catch (Exception ex) {
+            log.error("changePassword 예외: {}", ex.getMessage());
+            status = false;
+        } finally {
+            // 5: Return status
+            return status;
+        }
+    }  // changePassword()
 }

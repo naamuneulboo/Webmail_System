@@ -31,7 +31,7 @@
                         <td> 수신 </td>
                         <td> <input type="text" name="to" size="80"
                                     value="${!empty param['sender'] ? param['sender'] : ''}"
-            <!--    value=<%=request.getParameter("recv") == null ? "" : request.getParameter("recv")%>  -->
+                                    <!--    value=<%=request.getParameter("recv") == null ? "" : request.getParameter("recv")%>  -->
                         </td>
                     </tr>
                     <tr>
@@ -49,18 +49,19 @@
                     <tr>  <%-- TextArea    --%>
                         <td colspan="2">
                             <textarea rows="15" name="body" cols="80">${!empty param['sender'] ?
-"
+                                                                        "
 
 
 
-----
+-----------------------아래 내용에 대해 답장------------------------
 " += sessionScope['body'] : ''}</textarea> 
                         </td>
                     </tr>
                     <tr>
                         <td>첨부 파일</td>
-                        <td> <input type="file" name="file1"  size="80">  </td>
+                        <td> <input type="file" name="files" size="80" multiple>  </td>
                     </tr>
+
                     <tr>
                         <td colspan="2">
                             <input type="submit" value="메일 보내기">

@@ -4,6 +4,7 @@
  */
 package deu.cse.spring_webmail.model;
 
+import jakarta.mail.Address;
 import jakarta.mail.FetchProfile;
 import jakarta.mail.Flags;
 import jakarta.mail.Folder;
@@ -12,6 +13,8 @@ import jakarta.mail.Session;
 import jakarta.mail.Store;
 import java.util.Properties;
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -86,10 +89,7 @@ public class Pop3Agent {
         }
     }
 
-    /*
-     * 페이지 단위로 메일 목록을 보여주어야 함.
-     */
-    public String getMessageList() {
+    public String getMessageList(int page, int size) {
         String result = "";
         Message[] messages = null;
 
@@ -102,15 +102,32 @@ public class Pop3Agent {
             // 메일 폴더 열기
             Folder folder = store.getFolder("INBOX");  // 3.2
             folder.open(Folder.READ_ONLY);  // 3.3
-
+            
+            //전체 메일 수
+            int total = folder.getMessageCount();
+            
+            if (total == 0) {
+            //받은 메일이 없을 경우
+                StringBuilder buffer = new StringBuilder();
+                buffer.append("<strong>받은 메일이 없습니다.</strong>");
+                result = buffer.toString();
+                return buffer.toString();
+            }
+            
+            //페이징을 위한 범위 계산
+            int start = (page -1)* size + 1;
+            int end = Math.min(start + size - 1, total);
+            log.info("start={}, end={}",start, end);
+            //int startIndex = (page-1)*size+1;
+            
             // 현재 수신한 메시지 모두 가져오기
-            messages = folder.getMessages();      // 3.4
+            messages = folder.getMessages(start, end);      // 3.4
             FetchProfile fp = new FetchProfile();
             // From, To, Cc, Bcc, ReplyTo, Subject & Date
             fp.add(FetchProfile.Item.ENVELOPE);
             folder.fetch(messages, fp);
 
-            MessageFormatter formatter = new MessageFormatter(userid);  //3.5
+            MessageFormatter formatter = new MessageFormatter(userid,total,start, end);  //3.5
             result = formatter.getMessageTable(messages);   // 3.6
 
             folder.close(true);  // 3.7
@@ -179,4 +196,129 @@ public class Pop3Agent {
         }
     }
     
+     public String getMyOwnMessages(int page, int size) {
+        String result = "";
+        Message[] messages = null;
+
+        if (!connectToStore()) {
+            log.error("POP3 connection failed!");
+            return "POP3 연결이 되지 않아 메일 목록을 볼 수 없습니다.";
+        }
+
+        try {
+            // 메일 폴더 열기
+            Folder folder = store.getFolder("INBOX");
+            folder.open(Folder.READ_ONLY);
+
+            
+            //전체 메일 수
+            int total = getMyMessagesTotal();
+            log.info("messageArray.length={}",total);
+            //페이징을 위한 범위 계산
+            int start = (page -1)* size + 1;
+            int end = Math.min(start + size - 1, total);
+            log.info("To.Me start={}, end={}",start, end);
+            
+            // 현재 수신한 메시지 모두 가져오기
+            messages = folder.getMessages(start,end);
+            FetchProfile fp = new FetchProfile();
+            fp.add(FetchProfile.Item.ENVELOPE);
+            folder.fetch(messages, fp);
+
+            List<Message> myMessages = new ArrayList<>();
+            for (Message message : messages) {
+                Address[] fromAddresses = message.getFrom();
+                Address[] toAddresses = message.getRecipients(Message.RecipientType.TO);
+
+                if (fromAddresses != null && toAddresses != null) {
+                    for (Address from : fromAddresses) {
+                        for (Address to : toAddresses) {
+                            if (from.toString().equals(to.toString()) && from.toString().equals(userid)) {
+                                myMessages.add(message);
+                            }
+                        }
+                    }
+                }
+            }
+            Message[] myMessagesArray = myMessages.toArray(new Message[0]);
+            
+            MessageFormatter formatter = new MessageFormatter(userid, total, start, end);
+            result = formatter.getMessageTable(myMessagesArray);
+            log.info("ownMessage Array={}",myMessagesArray);
+
+            folder.close(true);
+            store.close();
+        } catch (Exception ex) {
+            log.error("Pop3Agent.getMyOwnMessages() : exception = {}", ex.getMessage());
+            result = "Pop3Agent.getMyOwnMessages() : exception = " + ex.getMessage();
+        } finally {
+            return result;
+        }
+    }
+    
+    public int getTotalMessageCount() {
+        if (!connectToStore()) {
+            log.error("POP3 connection failed!");
+            return 0;
+        }
+
+        try {
+            Folder folder = store.getFolder("INBOX");
+            folder.open(Folder.READ_ONLY);
+            int total = folder.getMessageCount();
+            folder.close(true);
+            store.close();
+            return total;
+        } catch (Exception ex) {
+            log.error("Pop3Agent.getTotalMessageCount() : exception = {}", ex.getMessage());
+            return 0;
+        }
+    }
+    
+
+
+    public int getMyMessagesTotal() {
+        String result = "";
+        Message[] messages = null;
+    
+        if (!connectToStore()) {
+            log.error("POP3 connection failed!");
+            return 0;
+        }
+        
+        try {
+            // 메일 폴더 열기
+            Folder folder = store.getFolder("INBOX");
+            folder.open(Folder.READ_ONLY);
+
+            // 현재 수신한 메시지 모두 가져오기
+            messages = folder.getMessages();
+            FetchProfile fp = new FetchProfile();
+            fp.add(FetchProfile.Item.ENVELOPE);
+            folder.fetch(messages, fp);
+
+            List<Message> myMessages = new ArrayList<>();
+            for (Message message : messages) {
+                Address[] fromAddresses = message.getFrom();
+                Address[] toAddresses = message.getRecipients(Message.RecipientType.TO);
+
+                if (fromAddresses != null && toAddresses != null) {
+                    for (Address from : fromAddresses) {
+                        for (Address to : toAddresses) {
+                            if (from.toString().equals(to.toString()) && from.toString().equals(userid)) {
+                                myMessages.add(message);
+                            }
+                        }
+                    }
+                }
+            }
+            Message[] myMessagesArray = myMessages.toArray(new Message[0]);
+            //전체 메일 수
+            int total = myMessagesArray.length;
+            return total;
+        } catch (Exception ex) {
+            log.error("Pop3Agent.getTotalMessageCount() : exception = {}", ex.getMessage());
+            return 0;
+    }
+    }
 }
