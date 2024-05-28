@@ -38,5 +38,13 @@ public class SpringWebmailApplication {
         
         return bean;
     }
+    
+    @Bean
+    public PropertiesFactoryBean configProperties(){
+        log.debug("configProperties() called...");
+        PropertiesFactoryBean bean = new PropertiesFactoryBean();
+        bean.setLocation(new ClassPathResource("/config.properties"));
+        return bean;
+    }
 
 }
