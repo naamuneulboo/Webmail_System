@@ -210,8 +210,17 @@ public class Pop3Agent {
             Folder folder = store.getFolder("INBOX");
             folder.open(Folder.READ_ONLY);
 
+            
+            //전체 메일 수
+            int total = getMyMessagesTotal();
+            log.info("messageArray.length={}",total);
+            //페이징을 위한 범위 계산
+            int start = (page -1)* size + 1;
+            int end = Math.min(start + size - 1, total);
+            log.info("To.Me start={}, end={}",start, end);
+            
             // 현재 수신한 메시지 모두 가져오기
-            messages = folder.getMessages();
+            messages = folder.getMessages(start,end);
             FetchProfile fp = new FetchProfile();
             fp.add(FetchProfile.Item.ENVELOPE);
             folder.fetch(messages, fp);
@@ -232,12 +241,6 @@ public class Pop3Agent {
                 }
             }
             Message[] myMessagesArray = myMessages.toArray(new Message[0]);
-            //전체 메일 수
-            int total = myMessagesArray.length;
-            //페이징을 위한 범위 계산
-            int start = (page -1)* size + 1;
-            int end = Math.min(start + size - 1, total);
-            log.info("To.Me start={}, end={}",start, end);
             
             MessageFormatter formatter = new MessageFormatter(userid, total, start, end);
             result = formatter.getMessageTable(myMessagesArray);
