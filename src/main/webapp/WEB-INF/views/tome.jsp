@@ -24,6 +24,36 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <title>내게 쓴 메일함</title>
     <link type="text/css" rel="stylesheet" href="css/main_style.css" />
+    <style>
+            .messages {
+                margin-bottom: 20px;
+            }
+            .pagination-container {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                margin: 20px 0;
+            }
+            .pagination {
+                display: flex;
+                justify-content: center;
+                list-style: none;
+                padding: 0;
+            }
+            .pagination li {
+                margin: 0 5px;
+            }
+            .pagination a {
+                text-decoration: none;
+                color: #007bff;
+            }
+            .pagination a:hover {
+                text-decoration: underline;
+            }
+            .pagination .current-page {
+                font-weight: bold;
+            }
+        </style>
     <script>
         <c:if test="${!empty msg}">
         alert("${msg}");
@@ -42,6 +72,22 @@
     ${messageList}
 </div>
 
+    <div class="pagination-container">
+                <ul class="pagination">
+                    <c:if test="${currentPage > 1}">
+                        <li><a href="?page=${currentPage - 1}&size=${size}"><<</a></li>
+                        </c:if>
+                        <c:forEach begin="1" end="${totalPages}" var="page">
+                        <li>
+                            <a href="?page=${page}&size=${size}" class="${page == currentPage ? 'current-page' : ''}">${page}</a>
+                        </li>
+                    </c:forEach>
+                    <c:if test="${currentPage < totalPages}">
+                        <li><a href="?page=${currentPage + 1}&size=${size}">>></a></li>
+                        </c:if>
+                </ul>
+            </div>
+    
 <%@include file="footer.jspf"%>
 </body>
 </html>

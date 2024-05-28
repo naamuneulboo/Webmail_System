@@ -57,7 +57,7 @@ public class MessageFormatter {
                 + " <th> 삭제 </td>   "
                 + " </tr>");
 
-         for (int i = 0; i < messages.length; i++) {
+         for (int i = 0; i < messages.length; i++) { 
             MessageParser parser = new MessageParser(messages[i], userid);
             parser.parse(false);  // envelope 정보만 필요
             

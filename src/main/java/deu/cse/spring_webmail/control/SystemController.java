@@ -162,14 +162,21 @@ public class SystemController {
 
     // 내게 쓴 메일함
     @GetMapping("/mail_tome")
-    public String tome(Model model){
+    public String tome(Model model, @RequestParam(name = "page", defaultValue = "1") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size){
+        
         Pop3Agent pop3 = new Pop3Agent();
         pop3.setHost((String) session.getAttribute("host"));
         pop3.setUserid((String) session.getAttribute("userid"));
         pop3.setPassword((String) session.getAttribute("password"));
 
-        String messageList = pop3.getMyOwnMessages();
+        String messageList = pop3.getMyOwnMessages(page, size);
+        int totalMessages = pop3.getMyMessagesTotal();
+        int totalPages = (int) Math.ceil((double) totalMessages / size);
+        
         model.addAttribute("messageList", messageList);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", totalPages);
         return "tome";
     }
     
