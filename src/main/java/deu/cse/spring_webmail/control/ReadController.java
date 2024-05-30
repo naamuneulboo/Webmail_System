@@ -88,7 +88,7 @@ public class ReadController {
 
     // 보낸 메일함 메일 삭제
     @GetMapping("/show_sentmessage")
-    public String deleteMessage(@RequestParam("messageId") String messageId, Model model) {
+    public String showsentMessage(@RequestParam("messageId") String messageId, Model model) {
 
         Pop3Agent pop3 = new Pop3Agent();
         pop3.setHost((String) session.getAttribute("host"));
